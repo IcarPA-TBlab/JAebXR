@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <projectDescription>
-	<name>jaebxr-api</name>
+	<name>jaebxr</name>
 	<comment></comment>
 	<projects>
 		<project>oasis-regrep-3.0</project>
