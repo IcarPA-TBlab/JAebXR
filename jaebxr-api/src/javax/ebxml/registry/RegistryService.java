@@ -1,7 +1,6 @@
 package javax.ebxml.registry;
 
 import javax.xml.registry.BulkResponse;
-import javax.xml.registry.BusinessQueryManager;
 import javax.xml.registry.CapabilityProfile;
 import javax.xml.registry.InvalidRequestException;
 import javax.xml.registry.JAXRException;
@@ -19,7 +18,7 @@ public class RegistryService implements javax.xml.registry.RegistryService {
 		this.rs = rs;
 		if (rs != null) {
 			this.blcm = new BusinessLifeCycleManager(rs);
-			this.bqm = rs.getBusinessQueryManager();
+			this.bqm = new BusinessQueryManager(rs);
 			this.dqm = new DeclarativeQueryManager(rs);
 		}
 	}

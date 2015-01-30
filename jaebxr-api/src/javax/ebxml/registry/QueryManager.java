@@ -2,6 +2,7 @@ package javax.ebxml.registry;
 
 import java.util.Collection;
 
+import javax.ebxml.registry.soap.SOAPMessenger;
 import javax.xml.registry.BulkResponse;
 import javax.xml.registry.JAXRException;
 import javax.xml.registry.RegistryService;
@@ -12,6 +13,7 @@ public class QueryManager implements javax.xml.registry.QueryManager {
 
     private javax.xml.registry.QueryManager qm = null;
 	private javax.xml.registry.RegistryService rs = null;
+	private SOAPMessenger msgr = null;
 
 	public QueryManager() {
 	}
@@ -24,6 +26,11 @@ public class QueryManager implements javax.xml.registry.QueryManager {
     	this.rs = rs;
     }
 
+	
+	protected void setSOAPMessenger(SOAPMessenger msr) {
+		this.msgr = msr;
+	}
+	
 	@Override
 	public RegistryObject getRegistryObject(String arg0) throws JAXRException {
 		return qm.getRegistryObject(arg0);
