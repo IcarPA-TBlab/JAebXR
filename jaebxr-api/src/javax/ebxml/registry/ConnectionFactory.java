@@ -1,20 +1,8 @@
 package javax.ebxml.registry;
 
-import java.io.BufferedInputStream;
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
-import java.io.IOException;
-import java.security.KeyStore;
-import java.security.KeyStoreException;
-import java.security.NoSuchAlgorithmException;
-import java.security.PrivateKey;
-import java.security.UnrecoverableKeyException;
-import java.security.cert.CertificateException;
-import java.security.cert.X509Certificate;
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.Properties;
-import java.util.Set;
 
 import javax.security.auth.x500.X500PrivateCredential;
 import javax.xml.registry.FederatedConnection;
@@ -50,6 +38,7 @@ public class ConnectionFactory extends javax.xml.registry.ConnectionFactory {
 	        
 	        javax.xml.registry.Connection c = cf.createConnection();
 
+	        /*
             Set<X500PrivateCredential> credentials;
 			try {
 				credentials = getCredentialsFromKeystore(conf.getClientKeystorePath(), conf.getClientKeystorePass(), conf.getClientAlias(), conf.getClientAliasPass());
@@ -58,13 +47,19 @@ public class ConnectionFactory extends javax.xml.registry.ConnectionFactory {
 					| IOException e) {
 				throw new JAXRException(e);
 			}
-            c.setCredentials(credentials);
+			*/
+			
+	        HashSet<X500PrivateCredential> credentials = new HashSet<X500PrivateCredential>();
+	        credentials.add(new X500PrivateCredential(conf.getClientCertificate(), conf.getClientPrivateKey(), conf.getClientAlias()));
+			
+			c.setCredentials(credentials);
             
             ebc = new Connection(c);
 		}
 		return ebc;
 	}
 	
+	/*
     private Set<X500PrivateCredential> getCredentialsFromKeystore(String keystorePath, String storepass, String alias, String keypass) throws KeyStoreException, NoSuchAlgorithmException, CertificateException, FileNotFoundException, IOException, UnrecoverableKeyException {
         HashSet<X500PrivateCredential> credentials = new HashSet<X500PrivateCredential>();
         KeyStore keyStore = KeyStore.getInstance("JKS");
@@ -74,6 +69,7 @@ public class ConnectionFactory extends javax.xml.registry.ConnectionFactory {
         credentials.add(new X500PrivateCredential(cert, privateKey, alias));
         return credentials;
     }
+    */
  
 	@Override
 	public FederatedConnection createFederatedConnection(@SuppressWarnings("rawtypes") Collection arg0)

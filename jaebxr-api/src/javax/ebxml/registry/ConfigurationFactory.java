@@ -18,7 +18,7 @@ import javax.xml.registry.JAXRException;
 
 public class ConfigurationFactory {
     public static boolean EXTERNALFILE = true;
-    public static String CONFIG_PATH = "/ebxml.properties";
+    public static String CONFIG_PATH = "/jaebxml.properties";
     private static ConfigurationFactory instance = null;
     private static String clientAlias;
     private static String clientAliasPass;
@@ -52,7 +52,7 @@ public class ConfigurationFactory {
             percorso += CONFIG_PATH;
             CONFIG_PATH = percorso;
         }
-        System.out.print("ebjaxr-api config path: ");
+        System.out.print("jaebxr config path: ");
         System.out.println(CONFIG_PATH);
         loadProperties();
     }
@@ -109,6 +109,14 @@ public class ConfigurationFactory {
     	return msgr;
     }
     
+    public PrivateKey getClientPrivateKey() {
+    	return privateKey;
+    }
+    
+    public X509Certificate getClientCertificate() {
+    	return (X509Certificate) certs[0];
+    }
+    
     private void loadProperties() throws JAXRException {
         synchronized (properties) {
             properties = new Properties();
@@ -139,13 +147,13 @@ public class ConfigurationFactory {
         
         try {
 			keyStore = KeyStore.getInstance("JKS");
-	        keyStore.load(new FileInputStream(properties.getProperty("client.keystore_path")), stringToCharArray(properties.getProperty("client.keystore_pass")));
-			certs = keyStore.getCertificateChain(properties.getProperty("client.alias"));
-			privateKey = (PrivateKey) keyStore.getKey(properties.getProperty("client.alias"), stringToCharArray(properties.getProperty("client.alias_pass")));
+	        keyStore.load(new FileInputStream(getClientKeystorePath()), stringToCharArray(getClientKeystorePass()));
+			certs = keyStore.getCertificateChain(getClientAlias());
+			privateKey = (PrivateKey) keyStore.getKey(getClientAlias(), stringToCharArray(getClientAliasPass()));
 			
-			credentialInfo = new CredentialInfo(null, (X509Certificate) certs[0], certs, privateKey);
+			credentialInfo = new CredentialInfo(getClientAlias(), (X509Certificate) certs[0], certs, privateKey);
 			
-			msgr = new SOAPMessenger(properties.getProperty("client.registry_url"), credentialInfo);
+			msgr = new SOAPMessenger(getClientRegistryUrl(), credentialInfo);
 		} catch (KeyStoreException | NoSuchAlgorithmException | CertificateException | IOException | UnrecoverableKeyException e) {
 			throw new JAXRException(e);
 		}

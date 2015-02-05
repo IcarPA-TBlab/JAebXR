@@ -13,7 +13,7 @@ public class QueryManager implements javax.xml.registry.QueryManager {
 
     private javax.xml.registry.QueryManager qm = null;
 	private javax.xml.registry.RegistryService rs = null;
-	private SOAPMessenger msgr = null;
+	protected SOAPMessenger msgr = null;
 
 	public QueryManager() {
 	}
