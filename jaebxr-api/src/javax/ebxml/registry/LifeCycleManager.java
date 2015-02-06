@@ -213,6 +213,7 @@ public class LifeCycleManager extends CanonicalConstants implements javax.xml.re
 
 	public ClassificationSchemeType createClassificationSchemeType(InternationalStringType name, InternationalStringType description) {
 		ClassificationSchemeType cs = rimFac.createClassificationSchemeType();
+		cs.setId(this.createUUID());
 		cs.setName(name);
 		cs.setDescription(description);
 		return cs;
@@ -249,10 +250,17 @@ public class LifeCycleManager extends CanonicalConstants implements javax.xml.re
 
 	public ClassificationNodeType createClassificationNodeType(RegistryObjectType parent, InternationalStringType name, String value) {
 		ClassificationNodeType cn = rimFac.createClassificationNodeType();
+		cn.setId(this.createUUID());
 		cn.setParent(parent.getId());
 		cn.setName(name);
 		cn.setCode(value);
+		cn.setDescription(name);
 		return cn;
+	}
+
+	public JAXBElement<ClassificationNodeType> createClassificationNodeType(ClassificationNodeType cn) {
+		JAXBElement<ClassificationNodeType> eb = rimFac.createClassificationNode(cn);
+		return eb;
 	}
 	
 	@Override
@@ -775,6 +783,12 @@ public class LifeCycleManager extends CanonicalConstants implements javax.xml.re
 
     public RegistryResponseType saveObject(JAXBElement<? extends IdentifiableType> eb) throws RegistryException {
     	SubmitObjectsRequest sreq = createSubmitObjectsRequest(eb);
+    	RegistryResponseType resp = saveObjects(sreq);
+    	return resp;
+    }
+
+    public RegistryResponseType saveObject(Collection <JAXBElement<? extends IdentifiableType>> ebl) throws RegistryException {
+    	SubmitObjectsRequest sreq = createSubmitObjectsRequest(ebl);
     	RegistryResponseType resp = saveObjects(sreq);
     	return resp;
     }
