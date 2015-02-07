@@ -198,6 +198,7 @@ public class LifeCycleManager extends CanonicalConstants implements javax.xml.re
 
 	public ClassificationSchemeType createClassificationSchemeType(ClassificationNodeType cn) {
 		ClassificationSchemeType cs = rimFac.createClassificationSchemeType();
+		cs.setId(this.createUUID());
 		cs.setName(cn.getName());
 		cs.setDescription(cn.getDescription());
 		cs.getClassification().addAll(cn.getClassification());
@@ -375,6 +376,7 @@ public class LifeCycleManager extends CanonicalConstants implements javax.xml.re
 
     public FederationType createFederationType(String name, String description) {
        	FederationType f = rimFac.createFederationType();
+       	f.setId(this.createUUID());
     	f.setName(createInternationalStringType(name));
     	if (description != null) f.setDescription(createInternationalStringType(description));
     	return f;
@@ -586,6 +588,7 @@ public class LifeCycleManager extends CanonicalConstants implements javax.xml.re
     
     public RegistryType createRegistryType(String name, String description) {
     	RegistryType r = rimFac.createRegistryType();
+    	r.setId(this.createUUID());
     	r.setName(createInternationalStringType(name));
     	if (description != null)
     		r.setDescription(createInternationalStringType(description));
@@ -608,6 +611,7 @@ public class LifeCycleManager extends CanonicalConstants implements javax.xml.re
 	
 	public ServiceType createServiceType(InternationalStringType name) {
 		ServiceType st = rimFac.createServiceType();
+		st.setId(this.createUUID());
 		st.setName(name);
 		return st;
 	}
