@@ -34,7 +34,6 @@ import org.oasis.ebxml.registry.bindings.rs.RegistryResponseType;
 public class BusinessQueryManager extends QueryManager implements javax.xml.registry.BusinessQueryManager {
 
 	private javax.xml.registry.BusinessQueryManager bqm = null;
-	private UUIDFactory uf = UUIDFactory.getInstance();
 	
 	private org.oasis.ebxml.registry.bindings.rim.ObjectFactory rimFac = new org.oasis.ebxml.registry.bindings.rim.ObjectFactory();
 	private org.oasis.ebxml.registry.bindings.query.ObjectFactory queryFac = new org.oasis.ebxml.registry.bindings.query.ObjectFactory();
@@ -156,10 +155,8 @@ public class BusinessQueryManager extends QueryManager implements javax.xml.regi
 		qet.setQueryLanguage(CanonicalConstants.CANONICAL_QUERY_LANGUAGE_LID_SQL_92);
 		qet.getContent().add(sqlQuery);
 
-		UUID id = uf.newUUID();
-		
 		AdhocQueryType aqt = rimFac.createAdhocQueryType();
-		aqt.setId(id.toString());		
+		aqt.setId(createUUID());		
 		aqt.setQueryExpression(qet);
 
 		ResponseOptionType rot = queryFac.createResponseOptionType();
@@ -178,8 +175,7 @@ public class BusinessQueryManager extends QueryManager implements javax.xml.regi
 
 		AdhocQueryRequest aqr = queryFac.createAdhocQueryRequest();
 		
-		id = uf.newUUID();
-		aqr.setId(id.toString());
+		aqr.setId(createUUID());
 		
 		aqr.setMaxResults(BigInteger.valueOf(-1));
 		aqr.setStartIndex(BigInteger.valueOf(0));
@@ -208,4 +204,9 @@ public class BusinessQueryManager extends QueryManager implements javax.xml.regi
 			throw new RegistryException(e);
 		}
 	}
+	
+    String createUUID() {
+        String id = "urn:uuid:" + UUIDFactory.getInstance().newUUID().toString();
+        return id;
+    }
 }
