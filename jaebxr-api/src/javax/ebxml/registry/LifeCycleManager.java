@@ -792,6 +792,11 @@ public class LifeCycleManager extends CanonicalConstants implements javax.xml.re
         bu.addSlotsToRequest(req, slotMap);
     }
 
+    public RegistryResponseType saveObject(ClassificationSchemeType cs) throws RegistryException {
+    	JAXBElement<ClassificationSchemeType> eb = createClassificationScheme(cs);
+    	return saveObject(eb);
+    }
+    
     public RegistryResponseType saveObject(JAXBElement<? extends IdentifiableType> eb) throws RegistryException {
     	SubmitObjectsRequest sreq = createSubmitObjectsRequest(eb);
     	RegistryResponseType resp = saveObjects(sreq);
