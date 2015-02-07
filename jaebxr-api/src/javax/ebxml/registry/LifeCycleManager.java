@@ -126,6 +126,7 @@ public class LifeCycleManager extends CanonicalConstants implements javax.xml.re
     
     public AssociationType1 createAssociationType(String srcId, String desId, String name, String description, String type) {
     	AssociationType1 a = rimFac.createAssociationType1();
+    	a.setId(this.createUUID());
     	a.setSourceObject(srcId);
     	a.setTargetObject(desId);
     	if (name != null)
@@ -171,6 +172,7 @@ public class LifeCycleManager extends CanonicalConstants implements javax.xml.re
 
 	public ClassificationType createClassificationType(ClassificationSchemeType scheme, InternationalStringType name, String value) {
 		ClassificationType c = rimFac.createClassificationType();
+		c.setId(this.createUUID());
 		c.setClassificationScheme(scheme.getId());
 		c.setName(name);
 		c.setNodeRepresentation(value);
@@ -276,15 +278,14 @@ public class LifeCycleManager extends CanonicalConstants implements javax.xml.re
 	}
 
 	public EmailAddressType createEmailAddressType(String address) throws JAXRException {
-		EmailAddressType ea = rimFac.createEmailAddressType();
-		ea.setAddress(address);
-		return ea;
+		return createEmailAddressType(address, null);
 	}
 
 	public EmailAddressType createEmailAddressType(String address, String type) throws JAXRException {
 		EmailAddressType ea = rimFac.createEmailAddressType();
 		ea.setAddress(address);
-		ea.setType(type);
+		if (type != null)
+			ea.setType(type);
 		return ea;
 	}
 
@@ -310,6 +311,7 @@ public class LifeCycleManager extends CanonicalConstants implements javax.xml.re
 	public ExternalIdentifierType createExternalIdentifierType(ClassificationSchemeType scheme, InternationalStringType name,
 			String value) {
 		ExternalIdentifierType ei = rimFac.createExternalIdentifierType();
+		ei.setId(this.createUUID());
 		ei.setIdentificationScheme(scheme.getId());
 		ei.setName(name);
 		ei.setValue(value);
@@ -334,6 +336,7 @@ public class LifeCycleManager extends CanonicalConstants implements javax.xml.re
 
 	public ExternalLinkType createExternalLinkType(String externalURI, InternationalStringType description) {
 		ExternalLinkType el = rimFac.createExternalLinkType();
+		el.setId(this.createUUID());
 		el.setExternalURI(externalURI);
 		el.setDescription(description);
 		return el;
@@ -351,6 +354,7 @@ public class LifeCycleManager extends CanonicalConstants implements javax.xml.re
 	
 	public ExtrinsicObjectType createExtrinsicObjectType(String id) {
 		ExtrinsicObjectType eo = rimFac.createExtrinsicObjectType();
+		eo.setId(this.createUUID());
 		if (id != null) {
 			eo.setObjectType(id);
 		}
@@ -359,6 +363,7 @@ public class LifeCycleManager extends CanonicalConstants implements javax.xml.re
 
 	public ExtrinsicObjectType createExtrinsicObjectType(RegistryObjectType ro) {
 		ExtrinsicObjectType eo = rimFac.createExtrinsicObjectType();
+		eo.setId(this.createUUID());
 		if ((ro != null)  && (ro.getId() != null)) {
 			eo.setObjectType(ro.getId());
 		}
@@ -494,6 +499,7 @@ public class LifeCycleManager extends CanonicalConstants implements javax.xml.re
 
 	public OrganizationType createOrganizationType(InternationalStringType name) {
 		OrganizationType o = rimFac.createOrganizationType();
+		o.setId(this.createUUID());
 		o.setName(name);
 		return o;
 	}
@@ -573,6 +579,7 @@ public class LifeCycleManager extends CanonicalConstants implements javax.xml.re
 
 	public RegistryPackageType createRegistryPackageType(InternationalStringType name) {
 		RegistryPackageType rp = rimFac.createRegistryPackageType();
+		rp.setId(this.createUUID());
 		rp.setName(name);
 		return rp;
 	}
