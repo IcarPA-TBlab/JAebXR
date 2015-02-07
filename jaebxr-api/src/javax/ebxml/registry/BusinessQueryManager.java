@@ -109,7 +109,7 @@ public class BusinessQueryManager extends QueryManager implements javax.xml.regi
 		return bqm.findServices(arg0, arg1, arg2, arg3, arg4);
 	}
 
-	public ClassificationSchemeType findClassificationSchemeByName(String name) throws RegistryException {
+	public ClassificationSchemeType findClassificationSchemeByName(String name) throws JAebXRException {
 		String sqlQuery = "SELECT obj.* from ClassificationScheme obj , Name_ nm WHERE ((nm.parent = obj.id) AND (nm.value LIKE '" + name + "'))";
 	
 		AdhocQueryResponse rr = (AdhocQueryResponse)submitSqlAdhocQuery(sqlQuery);		
@@ -122,14 +122,14 @@ public class BusinessQueryManager extends QueryManager implements javax.xml.regi
 			}
 			
 	        if (i.hasNext()) {
-	            throw new RegistryException("ClassificationScheme multiple match");
+	            throw new JAebXRException("ClassificationScheme multiple match");
 	        }
 		}
 		
 		return res;
 	}
 
-	public ClassificationNodeType findClassificationNodeByPath(String path) throws RegistryException {
+	public ClassificationNodeType findClassificationNodeByPath(String path) throws JAebXRException {
 		StringTokenizer st = new StringTokenizer(path, "/");
 		
 		String parent = st.nextToken();
@@ -150,7 +150,7 @@ public class BusinessQueryManager extends QueryManager implements javax.xml.regi
 		return res;
 	}
 	
-	private RegistryResponseType submitSqlAdhocQuery(String sqlQuery) throws RegistryException {
+	private RegistryResponseType submitSqlAdhocQuery(String sqlQuery) throws JAebXRException {
 		QueryExpressionType qet = rimFac.createQueryExpressionType();
 		qet.setQueryLanguage(CanonicalConstants.CANONICAL_QUERY_LANGUAGE_LID_SQL_92);
 		qet.getContent().add(sqlQuery);
@@ -197,11 +197,11 @@ public class BusinessQueryManager extends QueryManager implements javax.xml.regi
 
 			return ebResp;
 		} catch (JAXBException e) {
-			throw new RegistryException(e);
+			throw new JAebXRException(e);
 		} catch (RegistryException e) {
-			throw e;
+			throw new JAebXRException(e);
 		} catch (JAXRException e) {
-			throw new RegistryException(e);
+			throw new JAebXRException(e);
 		}
 	}
 	
