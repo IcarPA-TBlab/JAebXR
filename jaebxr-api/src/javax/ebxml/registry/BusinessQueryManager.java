@@ -19,8 +19,14 @@ import javax.xml.registry.infomodel.Key;
 
 import org.oasis.ebxml.registry.bindings.query.AdhocQueryRequest;
 import org.oasis.ebxml.registry.bindings.query.AdhocQueryResponse;
+import org.oasis.ebxml.registry.bindings.query.ClassificationNodeQueryType;
+import org.oasis.ebxml.registry.bindings.query.ClassificationSchemeQueryType;
+import org.oasis.ebxml.registry.bindings.query.CompoundFilterType;
+import org.oasis.ebxml.registry.bindings.query.FilterQueryType;
 import org.oasis.ebxml.registry.bindings.query.ResponseOptionType;
 import org.oasis.ebxml.registry.bindings.query.ResponseOptionType.ReturnType;
+import org.oasis.ebxml.registry.bindings.query.SimpleFilterType;
+import org.oasis.ebxml.registry.bindings.query.StringFilterType;
 import org.oasis.ebxml.registry.bindings.rim.AdhocQueryType;
 import org.oasis.ebxml.registry.bindings.rim.ClassificationNodeType;
 import org.oasis.ebxml.registry.bindings.rim.ClassificationSchemeType;
@@ -110,11 +116,23 @@ public class BusinessQueryManager extends QueryManager implements javax.xml.regi
 	}
 
 	public ClassificationSchemeType findClassificationSchemeByName(String name) throws JAebXRException {
-		String sqlQuery = "SELECT obj.* from ClassificationScheme obj , Name_ nm WHERE ((nm.parent = obj.id) AND (nm.value LIKE '" + name + "'))";
-	
-		AdhocQueryResponse rr = (AdhocQueryResponse)submitSqlAdhocQuery(sqlQuery);		
-		ClassificationSchemeType res = null;
+		StringFilterType f = queryFac.createStringFilterType();		
+		f.setComparator(SimpleFilterType.Comparator.EQ);
+		f.setDomainAttribute("name");
+		f.setValue(name);
 
+		ClassificationSchemeQueryType q = queryFac.createClassificationSchemeQueryType();
+		q.setPrimaryFilter(f);
+		JAXBElement<ClassificationSchemeQueryType> ebq = queryFac.createClassificationSchemeQuery(q);
+				
+		AdhocQueryResponse rr = (AdhocQueryResponse)submitRSFilterQuery(ebq);
+		
+		/*
+		String sqlQuery = "SELECT obj.* from ClassificationScheme obj , Name_ nm WHERE ((nm.parent = obj.id) AND (nm.value = '" + name + "'))";	
+		AdhocQueryResponse rr = (AdhocQueryResponse)submitSqlAdhocQuery(sqlQuery);		
+		*/
+
+		ClassificationSchemeType res = null;
 		if (rr.getStatus().equals(CanonicalConstants.CANONICAL_RESPONSE_STATUS_TYPE_LID_Success)) {
 			Iterator<JAXBElement<? extends IdentifiableType>> i = rr.getRegistryObjectList().getIdentifiable().iterator();
 			if (i.hasNext()) {
@@ -130,14 +148,36 @@ public class BusinessQueryManager extends QueryManager implements javax.xml.regi
 	}
 
 	public ClassificationNodeType findClassificationNodeByPath(String path) throws JAebXRException {
-		StringTokenizer st = new StringTokenizer(path, "/");
-		
+		StringTokenizer st = new StringTokenizer(path, "/");		
 		String parent = st.nextToken();
 		String code = st.nextToken();
+
+		StringFilterType lf = queryFac.createStringFilterType();
+		lf.setComparator(SimpleFilterType.Comparator.EQ);
+		lf.setDomainAttribute("parent");
+		lf.setValue(parent);
 		
-		String sqlQuery = "SELECT cn.* FROM ClassificationNode cn WHERE parent = '" + parent + "' AND code = '" + code +"'";
+		StringFilterType rf = queryFac.createStringFilterType();
+		rf.setComparator(SimpleFilterType.Comparator.EQ);
+		rf.setDomainAttribute("code");
+		rf.setValue(code);
+
+		CompoundFilterType cf = queryFac.createCompoundFilterType();
+		cf.setLeftFilter(lf);
+		cf.setRightFilter(rf);
+		cf.setLogicalOperator(CompoundFilterType.LogicalOperator.AND);
 		
+		ClassificationNodeQueryType q = queryFac.createClassificationNodeQueryType();
+		q.setPrimaryFilter(cf);
+		JAXBElement<ClassificationNodeQueryType> ebq = queryFac.createClassificationNodeQuery(q);
+
+		AdhocQueryResponse rr = (AdhocQueryResponse)submitRSFilterQuery(ebq);
+
+		/*
+		String sqlQuery = "SELECT cn.* FROM ClassificationNode cn WHERE parent = '" + parent + "' AND code = '" + code +"'";		
 		AdhocQueryResponse rr = (AdhocQueryResponse)submitSqlAdhocQuery(sqlQuery);
+		*/
+		
 		ClassificationNodeType res = null;
 		
 		if (rr.getStatus().equals(CanonicalConstants.CANONICAL_RESPONSE_STATUS_TYPE_LID_Success)) {
@@ -148,6 +188,62 @@ public class BusinessQueryManager extends QueryManager implements javax.xml.regi
 		}
 
 		return res;
+	}
+	
+	private RegistryResponseType submitRSFilterQuery(JAXBElement<? extends FilterQueryType> ebq) throws JAebXRException {
+		QueryExpressionType qet = rimFac.createQueryExpressionType();
+		qet.setQueryLanguage(CanonicalConstants.CANONICAL_QUERY_LANGUAGE_LID_ebRSFilterQuery);
+		
+		try {
+			qet.getContent().add(BindingUtility.getInstance().marshalObject(ebq));
+		} catch (JAXBException e1) {
+			throw new JAebXRException(e1);
+		}
+
+		AdhocQueryType aqt = rimFac.createAdhocQueryType();
+		aqt.setId(createUUID());		
+		aqt.setQueryExpression(qet);
+
+		ResponseOptionType rot = queryFac.createResponseOptionType();
+		rot.setReturnComposedObjects(true);
+		rot.setReturnType(ReturnType.LEAF_CLASS);
+		
+		ValueListType vlt = rimFac.createValueListType();
+		vlt.getValue().add("true");
+		
+		SlotType1 st = rimFac.createSlotType1();
+		st.setName(CanonicalConstants.IMPL_SLOT_CREATE_HTTP_SESSION);
+		st.setValueList(vlt);
+		
+		SlotListType slt = rimFac.createSlotListType();
+		slt.getSlot().add(st);
+
+		AdhocQueryRequest aqr = queryFac.createAdhocQueryRequest();
+		
+		aqr.setId(createUUID());
+		
+		aqr.setMaxResults(BigInteger.valueOf(-1));
+		aqr.setStartIndex(BigInteger.valueOf(0));
+		aqr.setFederated(false);
+		
+		aqr.setAdhocQuery(aqt);
+		aqr.setResponseOption(rot);
+		aqr.setRequestSlotList(slt);
+
+		RegistryResponseType ebResp = null;
+
+		try {
+			RegistryResponseHolder resp = msgr.sendSoapRequest(BindingUtility.getInstance().marshalObject(aqr));
+			ebResp = resp.getRegistryResponseType();
+		} catch (JAXBException e) {
+			throw new JAebXRException(e);
+		} catch (RegistryException e) {
+			throw new JAebXRException(e);
+		} catch (JAXRException e) {
+			throw new JAebXRException(e);
+		}
+
+		return ebResp;
 	}
 	
 	private RegistryResponseType submitSqlAdhocQuery(String sqlQuery) throws JAebXRException {
