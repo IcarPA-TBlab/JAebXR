@@ -120,6 +120,10 @@ public class LifeCycleManager extends CanonicalConstants implements javax.xml.re
 		return lcm.createAssociation(arg0, arg1);
 	}
 
+    public JAXBElement<AssociationType1> createAssociation(AssociationType1 a) {
+    	return rimFac.createAssociation(a);
+    }
+    
     public AssociationType1 createAssociationType(String srcId, String desId, String type) {
     	return createAssociationType(srcId, desId, null, null, type);
     }
@@ -764,11 +768,11 @@ public class LifeCycleManager extends CanonicalConstants implements javax.xml.re
 		return rs;
 	}
     
-    public AssociationType1 joinFederation(String fedId, String regId) {
-    	return createAssociationType(fedId, regId, CANONICAL_ASSOCIATION_TYPE_CODE_HasFederationMember);
+    public AssociationType1 joinFederation(String regId, String fedId) {
+    	return createAssociationType(regId, fedId, CANONICAL_ASSOCIATION_TYPE_CODE_HasFederationMember);
     }
-
-	@Override
+    
+    @Override
 	public BulkResponse saveObjects(@SuppressWarnings("rawtypes") Collection arg0) throws JAXRException {
 		return lcm.saveObjects(arg0);
 	}
@@ -792,9 +796,46 @@ public class LifeCycleManager extends CanonicalConstants implements javax.xml.re
         bu.addSlotsToRequest(req, slotMap);
     }
 
+    public RegistryResponseType saveObject(AssociationType1 a) throws RegistryException {
+    	JAXBElement<AssociationType1> eb = createAssociation(a);
+    	return saveObject(eb);
+    }
+
     public RegistryResponseType saveObject(ClassificationSchemeType cs) throws RegistryException {
     	JAXBElement<ClassificationSchemeType> eb = createClassificationScheme(cs);
     	return saveObject(eb);
+    }
+    
+    public RegistryResponseType saveObject(ClassificationNodeType cn) throws RegistryException {
+    	JAXBElement<ClassificationNodeType> eb = createClassificationNodeType(cn);
+    	return saveObject(eb);
+    }
+
+    public RegistryResponseType saveObject(RegistryType cn) throws RegistryException {
+    	JAXBElement<RegistryType> eb = createRegistry(cn);
+    	return saveObject(eb);
+    }
+
+    public RegistryResponseType saveClassificationNodes(Collection<ClassificationNodeType> ccn) throws RegistryException {
+    	Collection <JAXBElement<? extends IdentifiableType>> list = new ArrayList<JAXBElement<? extends IdentifiableType>>();
+    	Iterator<ClassificationNodeType> i = ccn.iterator();
+    	while (i.hasNext()) {
+    		list.add(this.createClassificationNodeType((ClassificationNodeType) i.next()));
+    	};
+    	SubmitObjectsRequest sreq = createSubmitObjectsRequest(list);
+    	RegistryResponseType resp = saveObjects(sreq);
+    	return resp;    	
+    }
+    
+    public RegistryResponseType saveFederations(Collection<FederationType> f) throws RegistryException {
+    	Collection <JAXBElement<? extends IdentifiableType>> list = new ArrayList<JAXBElement<? extends IdentifiableType>>();
+    	Iterator<FederationType> i = f.iterator();
+    	while (i.hasNext()) {
+    		list.add(this.createFederation((FederationType) i.next()));
+    	};
+    	SubmitObjectsRequest sreq = createSubmitObjectsRequest(list);
+    	RegistryResponseType resp = saveObjects(sreq);
+    	return resp;    	
     }
     
     public RegistryResponseType saveObject(JAXBElement<? extends IdentifiableType> eb) throws RegistryException {
@@ -803,11 +844,13 @@ public class LifeCycleManager extends CanonicalConstants implements javax.xml.re
     	return resp;
     }
 
+    /*
     public RegistryResponseType saveObject(Collection <JAXBElement<? extends IdentifiableType>> ebl) throws RegistryException {
     	SubmitObjectsRequest sreq = createSubmitObjectsRequest(ebl);
     	RegistryResponseType resp = saveObjects(sreq);
     	return resp;
     }
+    */
     
     public RegistryResponseType saveObjects(SubmitObjectsRequest req) throws RegistryException {
     	return submitObjects(req);
