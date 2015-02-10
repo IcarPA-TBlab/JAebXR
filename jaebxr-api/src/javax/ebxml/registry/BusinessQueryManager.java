@@ -32,6 +32,7 @@ import org.oasis.ebxml.registry.bindings.rim.ClassificationNodeType;
 import org.oasis.ebxml.registry.bindings.rim.ClassificationSchemeType;
 import org.oasis.ebxml.registry.bindings.rim.IdentifiableType;
 import org.oasis.ebxml.registry.bindings.rim.QueryExpressionType;
+import org.oasis.ebxml.registry.bindings.rim.RegistryObjectType;
 import org.oasis.ebxml.registry.bindings.rim.SlotListType;
 import org.oasis.ebxml.registry.bindings.rim.SlotType1;
 import org.oasis.ebxml.registry.bindings.rim.ValueListType;
@@ -190,6 +191,10 @@ public class BusinessQueryManager extends QueryManager implements javax.xml.regi
 		return res;
 	}
 	
+	public RegistryObjectType getRegistryObjectType(String id) {
+		return null;
+	}
+	
 	private RegistryResponseType submitRSFilterQuery(JAXBElement<? extends FilterQueryType> ebq) throws JAebXRException {
 		QueryExpressionType qet = rimFac.createQueryExpressionType();
 		qet.setQueryLanguage(CanonicalConstants.CANONICAL_QUERY_LANGUAGE_LID_ebRSFilterQuery);
@@ -246,6 +251,7 @@ public class BusinessQueryManager extends QueryManager implements javax.xml.regi
 		return ebResp;
 	}
 	
+	@SuppressWarnings("unused")
 	private RegistryResponseType submitSqlAdhocQuery(String sqlQuery) throws JAebXRException {
 		QueryExpressionType qet = rimFac.createQueryExpressionType();
 		qet.setQueryLanguage(CanonicalConstants.CANONICAL_QUERY_LANGUAGE_LID_SQL_92);
