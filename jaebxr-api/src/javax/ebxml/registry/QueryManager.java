@@ -15,9 +15,18 @@ public class QueryManager implements javax.xml.registry.QueryManager {
 	private javax.xml.registry.RegistryService rs = null;
 	protected SOAPMessenger msgr = null;
 
-	public QueryManager() {
+	protected org.oasis.ebxml.registry.bindings.rim.ObjectFactory rimFac = new org.oasis.ebxml.registry.bindings.rim.ObjectFactory();
+	protected org.oasis.ebxml.registry.bindings.query.ObjectFactory queryFac = new org.oasis.ebxml.registry.bindings.query.ObjectFactory();
+	
+	public QueryManager() throws JAXRException {
+		setSOAPMessenger(ConfigurationFactory.getInstance().getSOAPMessenger());
 	}
 
+    String createUUID() {
+        String id = "urn:uuid:" + UUIDFactory.getInstance().newUUID().toString();
+        return id;
+    }
+    
     protected void setQueryManager(javax.xml.registry.QueryManager qm) {
     	this.qm = qm;
     }
