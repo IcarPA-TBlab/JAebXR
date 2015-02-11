@@ -1,11 +1,22 @@
 package javax.ebxml.registry;
 
+import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Iterator;
 
+import javax.xml.bind.JAXBElement;
 import javax.xml.registry.BulkResponse;
 import javax.xml.registry.InvalidRequestException;
 import javax.xml.registry.JAXRException;
+import javax.xml.registry.RegistryException;
 import javax.xml.registry.infomodel.Association;
+
+import org.oasis.ebxml.registry.bindings.lcm.SubmitObjectsRequest;
+import org.oasis.ebxml.registry.bindings.rim.AssociationType1;
+import org.oasis.ebxml.registry.bindings.rim.ClassificationNodeType;
+import org.oasis.ebxml.registry.bindings.rim.ClassificationSchemeType;
+import org.oasis.ebxml.registry.bindings.rim.IdentifiableType;
+import org.oasis.ebxml.registry.bindings.rs.RegistryResponseType;
 
 public class BusinessLifeCycleManager extends LifeCycleManager implements javax.xml.registry.BusinessLifeCycleManager {
 
@@ -69,17 +80,44 @@ public class BusinessLifeCycleManager extends LifeCycleManager implements javax.
 		return blcm.saveAssociations(arg0, arg1);
 	}
 
+    public RegistryResponseType saveAssociationType(AssociationType1 a) throws RegistryException {
+    	JAXBElement<AssociationType1> eb = createAssociation(a);
+    	return saveObject(eb);
+    }
+    
 	@Override
 	public BulkResponse saveClassificationSchemes(@SuppressWarnings("rawtypes") Collection arg0)
 			throws JAXRException {
 		return blcm.saveClassificationSchemes(arg0);
 	}
-
+	
+    public RegistryResponseType saveClassificationSchemeType(ClassificationSchemeType cs) throws RegistryException {
+    	JAXBElement<ClassificationSchemeType> eb = createClassificationScheme(cs);
+    	return saveObject(eb);
+    }
+    
+    
 	@Override
 	public BulkResponse saveConcepts(@SuppressWarnings("rawtypes") Collection arg0) throws JAXRException {
 		return blcm.saveConcepts(arg0);
 	}
-
+    
+    public RegistryResponseType saveClassificationNodeType(ClassificationNodeType cn) throws RegistryException {
+    	JAXBElement<ClassificationNodeType> eb = createClassificationNodeType(cn);
+    	return saveObject(eb);
+    }
+    
+    public RegistryResponseType saveClassificationNodes(Collection<ClassificationNodeType> ccn) throws RegistryException {
+    	Collection <JAXBElement<? extends IdentifiableType>> list = new ArrayList<JAXBElement<? extends IdentifiableType>>();
+    	Iterator<ClassificationNodeType> i = ccn.iterator();
+    	while (i.hasNext()) {
+    		list.add(this.createClassificationNodeType((ClassificationNodeType) i.next()));
+    	};
+    	SubmitObjectsRequest sreq = createSubmitObjectsRequest(list);
+    	RegistryResponseType resp = saveObjects(sreq);
+    	return resp;    	
+    }
+    
 	@Override
 	public BulkResponse saveOrganizations(@SuppressWarnings("rawtypes") Collection arg0) throws JAXRException {
 		return blcm.saveOrganizations(arg0);
@@ -101,5 +139,6 @@ public class BusinessLifeCycleManager extends LifeCycleManager implements javax.
 			InvalidRequestException {
 		blcm.unConfirmAssociation(arg0);
 	}
+
 
 }

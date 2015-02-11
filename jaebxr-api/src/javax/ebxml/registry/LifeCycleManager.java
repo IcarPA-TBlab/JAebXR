@@ -796,37 +796,11 @@ public class LifeCycleManager extends CanonicalConstants implements javax.xml.re
         bu.addSlotsToRequest(req, slotMap);
     }
 
-    public RegistryResponseType saveObject(AssociationType1 a) throws RegistryException {
-    	JAXBElement<AssociationType1> eb = createAssociation(a);
-    	return saveObject(eb);
-    }
-
-    public RegistryResponseType saveObject(ClassificationSchemeType cs) throws RegistryException {
-    	JAXBElement<ClassificationSchemeType> eb = createClassificationScheme(cs);
-    	return saveObject(eb);
-    }
-    
-    public RegistryResponseType saveObject(ClassificationNodeType cn) throws RegistryException {
-    	JAXBElement<ClassificationNodeType> eb = createClassificationNodeType(cn);
-    	return saveObject(eb);
-    }
-
     public RegistryResponseType saveObject(RegistryType cn) throws RegistryException {
     	JAXBElement<RegistryType> eb = createRegistry(cn);
     	return saveObject(eb);
     }
-
-    public RegistryResponseType saveClassificationNodes(Collection<ClassificationNodeType> ccn) throws RegistryException {
-    	Collection <JAXBElement<? extends IdentifiableType>> list = new ArrayList<JAXBElement<? extends IdentifiableType>>();
-    	Iterator<ClassificationNodeType> i = ccn.iterator();
-    	while (i.hasNext()) {
-    		list.add(this.createClassificationNodeType((ClassificationNodeType) i.next()));
-    	};
-    	SubmitObjectsRequest sreq = createSubmitObjectsRequest(list);
-    	RegistryResponseType resp = saveObjects(sreq);
-    	return resp;    	
-    }
-    
+  
     public RegistryResponseType saveFederations(Collection<FederationType> f) throws RegistryException {
     	Collection <JAXBElement<? extends IdentifiableType>> list = new ArrayList<JAXBElement<? extends IdentifiableType>>();
     	Iterator<FederationType> i = f.iterator();
