@@ -191,7 +191,33 @@ public class BusinessQueryManager extends QueryManager implements javax.xml.regi
 		return res;
 	}
 	
+	// TODO
 	public RegistryObjectType getRegistryObjectType(String id) {
+		return null;
+	}
+	
+	// TODO
+	public RegistryObjectType getRegistryObjectType(String id, String objectType) {
+		return null;
+	}
+	
+	// TODO
+	public Collection<RegistryObjectType> getRegistryObjectTypes() {
+		return null;
+	}
+	
+	// TODO
+	public Collection<RegistryObjectType> getRegistryObjectTypes(String objectType) {
+		return null;
+	}
+	
+	// TODO
+	public Collection<RegistryObjectType> getRegistryObjectTypes(Collection<String> objectKeys) {
+		return null;
+	}
+	
+	// TODO
+	public Collection<RegistryObjectType> getRegistryObjectTypes(Collection<String> objectKeys, String objectType) {
 		return null;
 	}
 	
