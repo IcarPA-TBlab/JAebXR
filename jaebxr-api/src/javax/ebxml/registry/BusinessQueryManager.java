@@ -1,53 +1,37 @@
 package javax.ebxml.registry;
 
-import java.io.StringWriter;
-import java.math.BigInteger;
 import java.util.Collection;
 import java.util.Iterator;
 import java.util.StringTokenizer;
 
-import javax.ebxml.registry.soap.BindingUtility;
 import javax.xml.bind.JAXBElement;
-import javax.xml.bind.JAXBException;
-import javax.xml.bind.Marshaller;
 import javax.xml.registry.BulkResponse;
 import javax.xml.registry.JAXRException;
-import javax.xml.registry.RegistryException;
 import javax.xml.registry.infomodel.ClassificationScheme;
 import javax.xml.registry.infomodel.Concept;
 import javax.xml.registry.infomodel.Key;
 
-import org.oasis.ebxml.registry.bindings.query.AdhocQueryRequest;
 import org.oasis.ebxml.registry.bindings.query.AdhocQueryResponse;
 import org.oasis.ebxml.registry.bindings.query.ClassificationNodeQueryType;
 import org.oasis.ebxml.registry.bindings.query.ClassificationSchemeQueryType;
 import org.oasis.ebxml.registry.bindings.query.CompoundFilterType;
-import org.oasis.ebxml.registry.bindings.query.FilterQueryType;
-import org.oasis.ebxml.registry.bindings.query.ResponseOptionType;
-import org.oasis.ebxml.registry.bindings.query.ResponseOptionType.ReturnType;
 import org.oasis.ebxml.registry.bindings.query.SimpleFilterType;
 import org.oasis.ebxml.registry.bindings.query.StringFilterType;
 import org.oasis.ebxml.registry.bindings.rim.AdhocQueryType;
 import org.oasis.ebxml.registry.bindings.rim.ClassificationNodeType;
 import org.oasis.ebxml.registry.bindings.rim.ClassificationSchemeType;
 import org.oasis.ebxml.registry.bindings.rim.IdentifiableType;
-import org.oasis.ebxml.registry.bindings.rim.QueryExpressionType;
 import org.oasis.ebxml.registry.bindings.rim.RegistryObjectType;
-import org.oasis.ebxml.registry.bindings.rim.SlotListType;
-import org.oasis.ebxml.registry.bindings.rim.SlotType1;
-import org.oasis.ebxml.registry.bindings.rim.ValueListType;
-import org.oasis.ebxml.registry.bindings.rs.RegistryResponseType;
 
 public class BusinessQueryManager extends QueryManager implements javax.xml.registry.BusinessQueryManager {
 
 	private javax.xml.registry.BusinessQueryManager bqm = null;
-	
-	private org.oasis.ebxml.registry.bindings.rim.ObjectFactory rimFac = new org.oasis.ebxml.registry.bindings.rim.ObjectFactory();
-	private org.oasis.ebxml.registry.bindings.query.ObjectFactory queryFac = new org.oasis.ebxml.registry.bindings.query.ObjectFactory();
+	private DeclarativeQueryManager dqm = null;
 	
 	public BusinessQueryManager(javax.xml.registry.RegistryService rs) throws JAXRException {
 		super();
 		this.bqm = rs.getBusinessQueryManager();
+		this.dqm = (DeclarativeQueryManager) rs.getDeclarativeQueryManager();
 		this.setRegistryService(rs);
 		this.setQueryManager(bqm);
 		this.setSOAPMessenger(ConfigurationFactory.getInstance().getSOAPMessenger());
@@ -126,14 +110,18 @@ public class BusinessQueryManager extends QueryManager implements javax.xml.regi
 		q.setPrimaryFilter(f);
 		JAXBElement<ClassificationSchemeQueryType> ebq = queryFac.createClassificationSchemeQuery(q);
 				
-		AdhocQueryResponse rr = (AdhocQueryResponse)submitRSFilterQuery(ebq);
-		
+		//AdhocQueryResponse rr = (AdhocQueryResponse)submitRSFilterQuery(ebq);
+
+		AdhocQueryType aqt = dqm.createQuery(CanonicalConstants.CANONICAL_QUERY_LANGUAGE_LID_ebRSFilterQuery, ebq);
+		AdhocQueryResponse rr = (AdhocQueryResponse) dqm.executeQuery(aqt);
+
 		/*
 		String sqlQuery = "SELECT obj.* from ClassificationScheme obj , Name_ nm WHERE ((nm.parent = obj.id) AND (nm.value = '" + name + "'))";	
 		AdhocQueryResponse rr = (AdhocQueryResponse)submitSqlAdhocQuery(sqlQuery);		
 		*/
 
 		ClassificationSchemeType res = null;
+		
 		if (rr.getStatus().equals(CanonicalConstants.CANONICAL_RESPONSE_STATUS_TYPE_LID_Success)) {
 			Iterator<JAXBElement<? extends IdentifiableType>> i = rr.getRegistryObjectList().getIdentifiable().iterator();
 			if (i.hasNext()) {
@@ -172,7 +160,10 @@ public class BusinessQueryManager extends QueryManager implements javax.xml.regi
 		q.setPrimaryFilter(cf);
 		JAXBElement<ClassificationNodeQueryType> ebq = queryFac.createClassificationNodeQuery(q);
 
-		AdhocQueryResponse rr = (AdhocQueryResponse)submitRSFilterQuery(ebq);
+		// AdhocQueryResponse rr = (AdhocQueryResponse)submitRSFilterQuery(ebq);
+
+		AdhocQueryType aqt = dqm.createQuery(CanonicalConstants.CANONICAL_QUERY_LANGUAGE_LID_ebRSFilterQuery, ebq);
+		AdhocQueryResponse rr = (AdhocQueryResponse) dqm.executeQuery(aqt);
 
 		/*
 		String sqlQuery = "SELECT cn.* FROM ClassificationNode cn WHERE parent = '" + parent + "' AND code = '" + code +"'";		
@@ -221,6 +212,7 @@ public class BusinessQueryManager extends QueryManager implements javax.xml.regi
 		return null;
 	}
 	
+	/*
 	private RegistryResponseType submitRSFilterQuery(JAXBElement<? extends FilterQueryType> ebq) throws JAebXRException {
 		QueryExpressionType qet = rimFac.createQueryExpressionType();
 		qet.setQueryLanguage(CanonicalConstants.CANONICAL_QUERY_LANGUAGE_LID_ebRSFilterQuery);
@@ -277,7 +269,6 @@ public class BusinessQueryManager extends QueryManager implements javax.xml.regi
 		return ebResp;
 	}
 	
-	@SuppressWarnings("unused")
 	private RegistryResponseType submitSqlAdhocQuery(String sqlQuery) throws JAebXRException {
 		QueryExpressionType qet = rimFac.createQueryExpressionType();
 		qet.setQueryLanguage(CanonicalConstants.CANONICAL_QUERY_LANGUAGE_LID_SQL_92);
@@ -332,9 +323,5 @@ public class BusinessQueryManager extends QueryManager implements javax.xml.regi
 			throw new JAebXRException(e);
 		}
 	}
-	
-    String createUUID() {
-        String id = "urn:uuid:" + UUIDFactory.getInstance().newUUID().toString();
-        return id;
-    }
+	*/
 }
