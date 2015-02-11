@@ -8,7 +8,6 @@ import javax.xml.bind.JAXBElement;
 import javax.xml.registry.BulkResponse;
 import javax.xml.registry.InvalidRequestException;
 import javax.xml.registry.JAXRException;
-import javax.xml.registry.RegistryException;
 import javax.xml.registry.infomodel.Association;
 
 import org.oasis.ebxml.registry.bindings.lcm.SubmitObjectsRequest;
@@ -80,7 +79,7 @@ public class BusinessLifeCycleManager extends LifeCycleManager implements javax.
 		return blcm.saveAssociations(arg0, arg1);
 	}
 
-    public RegistryResponseType saveAssociationType(AssociationType1 a) throws RegistryException {
+    public RegistryResponseType saveAssociationType(AssociationType1 a) throws JAebXRException {
     	JAXBElement<AssociationType1> eb = createAssociation(a);
     	return saveObject(eb);
     }
@@ -91,7 +90,7 @@ public class BusinessLifeCycleManager extends LifeCycleManager implements javax.
 		return blcm.saveClassificationSchemes(arg0);
 	}
 	
-    public RegistryResponseType saveClassificationSchemeType(ClassificationSchemeType cs) throws RegistryException {
+    public RegistryResponseType saveClassificationSchemeType(ClassificationSchemeType cs) throws JAebXRException {
     	JAXBElement<ClassificationSchemeType> eb = createClassificationScheme(cs);
     	return saveObject(eb);
     }
@@ -102,12 +101,12 @@ public class BusinessLifeCycleManager extends LifeCycleManager implements javax.
 		return blcm.saveConcepts(arg0);
 	}
     
-    public RegistryResponseType saveClassificationNodeType(ClassificationNodeType cn) throws RegistryException {
+    public RegistryResponseType saveClassificationNodeType(ClassificationNodeType cn) throws JAebXRException {
     	JAXBElement<ClassificationNodeType> eb = createClassificationNodeType(cn);
     	return saveObject(eb);
     }
     
-    public RegistryResponseType saveClassificationNodes(Collection<ClassificationNodeType> ccn) throws RegistryException {
+    public RegistryResponseType saveClassificationNodes(Collection<ClassificationNodeType> ccn) throws JAebXRException {
     	Collection <JAXBElement<? extends IdentifiableType>> list = new ArrayList<JAXBElement<? extends IdentifiableType>>();
     	Iterator<ClassificationNodeType> i = ccn.iterator();
     	while (i.hasNext()) {

@@ -796,12 +796,12 @@ public class LifeCycleManager extends CanonicalConstants implements javax.xml.re
         bu.addSlotsToRequest(req, slotMap);
     }
 
-    public RegistryResponseType saveObject(RegistryType cn) throws RegistryException {
+    public RegistryResponseType saveObject(RegistryType cn) throws JAebXRException {
     	JAXBElement<RegistryType> eb = createRegistry(cn);
     	return saveObject(eb);
     }
   
-    public RegistryResponseType saveFederations(Collection<FederationType> f) throws RegistryException {
+    public RegistryResponseType saveFederations(Collection<FederationType> f) throws JAebXRException {
     	Collection <JAXBElement<? extends IdentifiableType>> list = new ArrayList<JAXBElement<? extends IdentifiableType>>();
     	Iterator<FederationType> i = f.iterator();
     	while (i.hasNext()) {
@@ -812,7 +812,7 @@ public class LifeCycleManager extends CanonicalConstants implements javax.xml.re
     	return resp;    	
     }
     
-    public RegistryResponseType saveObject(JAXBElement<? extends IdentifiableType> eb) throws RegistryException {
+    public RegistryResponseType saveObject(JAXBElement<? extends IdentifiableType> eb) throws JAebXRException {
     	SubmitObjectsRequest sreq = createSubmitObjectsRequest(eb);
     	RegistryResponseType resp = saveObjects(sreq);
     	return resp;
@@ -826,15 +826,15 @@ public class LifeCycleManager extends CanonicalConstants implements javax.xml.re
     }
     */
     
-    public RegistryResponseType saveObjects(SubmitObjectsRequest req) throws RegistryException {
+    public RegistryResponseType saveObjects(SubmitObjectsRequest req) throws JAebXRException {
     	return submitObjects(req);
     }
     
-    public RegistryResponseType deleteObjects(RemoveObjectsRequest req) throws RegistryException {
+    public RegistryResponseType deleteObjects(RemoveObjectsRequest req) throws JAebXRException {
     	return submitObjects(req);
     }
     
-    private RegistryResponseType submitObjects(RegistryRequestType req) throws RegistryException {
+    private RegistryResponseType submitObjects(RegistryRequestType req) throws JAebXRException {
         try {
         	addCreateSessionSlot(req);
 
@@ -849,13 +849,13 @@ public class LifeCycleManager extends CanonicalConstants implements javax.xml.re
             return resp.getRegistryResponseType();
         }
         catch (JAXBException e) {
-            throw new RegistryException(e);
+            throw new JAebXRException(e);
         }
         catch (RegistryException e) {
-            throw e;
+            throw new JAebXRException(e);
         }        
         catch (JAXRException e) {
-            throw new RegistryException(e);
+            throw new JAebXRException(e);
         }
     }
 
