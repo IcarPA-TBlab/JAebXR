@@ -10,10 +10,8 @@ import java.util.List;
 import java.util.Locale;
 
 import javax.activation.DataHandler;
-
 import javax.ebxml.registry.soap.BindingUtility;
 import javax.ebxml.registry.soap.SOAPMessenger;
-
 import javax.xml.bind.JAXBElement;
 import javax.xml.bind.JAXBException;
 import javax.xml.bind.Marshaller;
@@ -768,8 +766,10 @@ public class LifeCycleManager extends CanonicalConstants implements javax.xml.re
 		return rs;
 	}
     
-    public AssociationType1 joinFederation(String regId, String fedId) {
-    	return createAssociationType(regId, fedId, CANONICAL_ASSOCIATION_TYPE_CODE_HasFederationMember);
+    public AssociationType1 joinFederation(String fedId, String regId) throws JAebXRException {
+    	AssociationType1 a = createAssociationType(fedId, regId, CANONICAL_ASSOCIATION_TYPE_CODE_HasFederationMember);  	
+    	saveObject(createAssociation(a));
+    	return a;
     }
     
     @Override
