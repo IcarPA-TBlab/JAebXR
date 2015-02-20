@@ -384,37 +384,40 @@ public class LifeCycleManager extends CanonicalConstants implements javax.xml.re
 		
 		ExtrinsicObjectType eo = rimFac.createExtrinsicObjectType();
 		eo.setId(this.createUUID());
-		
-		DataHandler dh = new DataHandler(url);		
-		eo.setMimeType(dh.getContentType());
 		eo.setObjectType("urn:oasis:names:tc:ebxml-regrep:ObjectType:RegistryObject:ExtrinsicObject");
 		
 		if (name != null)
 			eo.setName(createInternationalStringType(name));
+		
 		if (description != null)
 			eo.setDescription(createInternationalStringType(description));
 		
-		ValueListType v1 = rimFac.createValueListType();
-		v1.getValue().add(url.getPath());
-
-		ValueListType v2 = rimFac.createValueListType();
-		v2.getValue().add(url.toExternalForm());
-		
-		SlotType1 s1 = rimFac.createSlotType1();
-		s1.setName("urn:oasis:names:tc:ebxml-regrep:rim:RegistryObject:locator");
-		s1.setValueList(v1);
-		
-		SlotType1 s2 = rimFac.createSlotType1();
-		s2.setName("urn:oasis:names:tc:ebxml-regrep:rim:RegistryObject:contentLocator");
-		s2.setValueList(v1);
-		
-		SlotType1 s3 = rimFac.createSlotType1();
-		s3.setName("URL");
-		s3.setValueList(v2);
-		
-		eo.getSlot().add(s1);
-		eo.getSlot().add(s2);
-		eo.getSlot().add(s3);
+		if (url != null) {
+			DataHandler dh = new DataHandler(url);		
+			eo.setMimeType(dh.getContentType());
+	
+			ValueListType v1 = rimFac.createValueListType();
+			v1.getValue().add(url.getPath());
+	
+			ValueListType v2 = rimFac.createValueListType();
+			v2.getValue().add(url.toExternalForm());
+			
+			SlotType1 s1 = rimFac.createSlotType1();
+			s1.setName("urn:oasis:names:tc:ebxml-regrep:rim:RegistryObject:locator");
+			s1.setValueList(v1);
+			
+			SlotType1 s2 = rimFac.createSlotType1();
+			s2.setName("urn:oasis:names:tc:ebxml-regrep:rim:RegistryObject:contentLocator");
+			s2.setValueList(v1);
+			
+			SlotType1 s3 = rimFac.createSlotType1();
+			s3.setName("URL");
+			s3.setValueList(v2);
+			
+			eo.getSlot().add(s1);
+			eo.getSlot().add(s2);
+			eo.getSlot().add(s3);
+		}
 		
 		return eo;
 	}
