@@ -203,7 +203,7 @@ public class BusinessQueryManager extends QueryManager implements javax.xml.regi
 				aeList.add((AuditableEventType) i.next().getValue());
 			}
 		}
-
+		
 		if (aeList.size() == 0)
 			aeList = null;
 		
