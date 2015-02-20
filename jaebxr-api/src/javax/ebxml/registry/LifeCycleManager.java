@@ -413,7 +413,13 @@ public class LifeCycleManager extends CanonicalConstants implements javax.xml.re
 		if (description != null)
 			eo.setDescription(createInternationalStringType(description));
 		
-		if (url != null) {
+		setRepositoryItem(eo, url);
+		
+		return eo;
+	}
+
+	public void setRepositoryItem(ExtrinsicObjectType eo, URL url) {
+		if ((eo != null) && (url != null)) {
 			DataHandler dh = new DataHandler(url);		
 			eo.setMimeType(dh.getContentType());
 	
@@ -438,11 +444,9 @@ public class LifeCycleManager extends CanonicalConstants implements javax.xml.re
 			eo.getSlot().add(s1);
 			eo.getSlot().add(s2);
 			eo.getSlot().add(s3);
-		}
-		
-		return eo;
+		}		
 	}
-
+	
 	public JAXBElement<FederationType> createFederation(FederationType f) {
     	JAXBElement<FederationType> eb = rimFac.createFederation(f);
     	return eb;
