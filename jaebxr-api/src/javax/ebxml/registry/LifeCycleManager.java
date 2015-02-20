@@ -926,21 +926,23 @@ public class LifeCycleManager extends CanonicalConstants implements javax.xml.re
     	Map<String, DataHandler> m = new HashMap<String, DataHandler>();
     	String urlString = null;
     	List<SlotType1> sl = eo.getSlot();
-    	Iterator<SlotType1> i = sl.iterator();
-    	while (i.hasNext()) {
-    		SlotType1 s = (SlotType1) i.next();
-    		if (s.getName().equals("URL")) {
-    			urlString = s.getValueList().getValue().get(0);
-    			//System.err.println("Attach: " + urlString);
-    			break;
-    		}
+    	if (sl != null) {
+	    	Iterator<SlotType1> i = sl.iterator();
+	    	while (i.hasNext()) {
+	    		SlotType1 s = (SlotType1) i.next();
+	    		if (s.getName().equals("URL")) {
+	    			urlString = s.getValueList().getValue().get(0);
+	    			//System.err.println("Attach: " + urlString);
+	    			break;
+	    		}
+	    	}
+	    	if (urlString != null)
+				try {
+					m.put(eo.getId(), new DataHandler(new URL(urlString)));
+				} catch (MalformedURLException e) {
+					throw new JAebXRException(e);
+				}
     	}
-    	if (urlString != null)
-			try {
-				m.put(eo.getId(), new DataHandler(new URL(urlString)));
-			} catch (MalformedURLException e) {
-				throw new JAebXRException(e);
-			}
     	return saveObjectType(eb, m);
     }
     
