@@ -182,6 +182,26 @@ public class BusinessQueryManager extends QueryManager implements javax.xml.regi
 		return res;
 	}
 	
+	public Collection<RegistryObjectType> findAllMyObjects() throws JAebXRException {
+		AdhocQueryType storedQuery = rimFac.createAdhocQueryType();
+		storedQuery.setId(CanonicalConstants.CANONICAL_QUERY_FindAllMyObjects);
+
+		AdhocQueryResponse rr = (AdhocQueryResponse) dqm.executeQuery(storedQuery);		
+		Collection<RegistryObjectType> roList = new ArrayList<RegistryObjectType>();
+		
+		if (rr.getStatus().equals(CanonicalConstants.CANONICAL_RESPONSE_STATUS_TYPE_LID_Success)) {
+			Iterator<JAXBElement<? extends IdentifiableType>> i = rr.getRegistryObjectList().getIdentifiable().iterator();			
+			while (i.hasNext()) {
+				roList.add((RegistryObjectType) i.next().getValue());
+			}
+		}
+		
+		if (roList.size() == 0)
+			roList = null;
+		
+		return roList;
+	}
+
 	public Collection<AuditableEventType> getAuditTrailForRegistryObject(String id) throws JAebXRException {
 		ValueListType vlt = rimFac.createValueListType();
 		vlt.getValue().add(id);
