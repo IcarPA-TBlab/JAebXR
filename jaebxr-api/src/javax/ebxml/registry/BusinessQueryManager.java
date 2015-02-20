@@ -181,7 +181,6 @@ public class BusinessQueryManager extends QueryManager implements javax.xml.regi
 		return res;
 	}
 	
-	// TODO
 	public Collection<AuditableEventType> getAuditTrailForRegistryObject(String id) throws JAebXRException {
 		ValueListType vlt = rimFac.createValueListType();
 		vlt.getValue().add(id);
@@ -210,6 +209,36 @@ public class BusinessQueryManager extends QueryManager implements javax.xml.regi
 		return aeList;
 	}
 	
+	public ClassificationSchemeType getClassificationSchemesById(String id) throws JAebXRException {
+		ValueListType vlt = rimFac.createValueListType();
+		vlt.getValue().add(id);
+
+		SlotType1 st = rimFac.createSlotType1();
+		st.setName("$id");
+		st.setValueList(vlt);
+		
+		AdhocQueryType storedQuery = rimFac.createAdhocQueryType();
+		storedQuery.setId(CanonicalConstants.CANONICAL_QUERY_GetClassificationSchemesById);
+		storedQuery.getSlot().add(st);
+
+		AdhocQueryResponse rr = (AdhocQueryResponse) dqm.executeQuery(storedQuery);		
+		
+		ClassificationSchemeType res = null;
+		
+		if (rr.getStatus().equals(CanonicalConstants.CANONICAL_RESPONSE_STATUS_TYPE_LID_Success)) {
+			Iterator<JAXBElement<? extends IdentifiableType>> i = rr.getRegistryObjectList().getIdentifiable().iterator();
+			if (i.hasNext()) {
+				res = (ClassificationSchemeType) i.next().getValue();
+			}
+			
+	        if (i.hasNext()) {
+	            throw new JAebXRException("ClassificationScheme multiple match");
+	        }
+		}
+		
+		return res;
+	}
+	
 	public RegistryObjectType getRegistryObjectType(String id) throws JAebXRException {
 		StringFilterType f = queryFac.createStringFilterType();		
 		f.setComparator(SimpleFilterType.Comparator.EQ);
@@ -232,7 +261,7 @@ public class BusinessQueryManager extends QueryManager implements javax.xml.regi
 			}
 			
 	        if (i.hasNext()) {
-	            throw new JAebXRException("ClassificationScheme multiple match");
+	            throw new JAebXRException("RegistryObject multiple match");
 	        }
 		}
 		
