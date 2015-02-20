@@ -180,16 +180,37 @@ public class LifeCycleManager extends CanonicalConstants implements javax.xml.re
     	return eb;
     }
   
-    public ClassificationType createClassificationType(ClassificationSchemeType scheme, String name, String value) {
-		return createClassificationType(scheme, createInternationalStringType(name), value);
+    public ClassificationType createClassificationType(ClassificationSchemeType scheme) {
+		return createClassificationType(scheme, null, null);
 	}
 
-	public ClassificationType createClassificationType(ClassificationSchemeType scheme, InternationalStringType name, String value) {
+	public ClassificationType createClassificationType(ClassificationSchemeType scheme, String name, String value) {
 		ClassificationType c = rimFac.createClassificationType();
 		c.setId(this.createUUID());
 		c.setClassificationScheme(scheme.getId());
-		c.setName(name);
-		c.setNodeRepresentation(value);
+		
+		if (name != null)
+			c.setName(createInternationalStringType(name));
+		if (value != null)
+			c.setNodeRepresentation(value);
+		
+		return c;
+	}
+	
+	public ClassificationType createClassificationType(ClassificationNodeType node) {
+		return createClassificationType(node, null, null);
+	}
+
+	public ClassificationType createClassificationType(ClassificationNodeType node, InternationalStringType name, String value) {
+		ClassificationType c = rimFac.createClassificationType();
+		c.setId(this.createUUID());
+		c.setClassificationNode(node.getId());
+		
+		if (name != null)
+			c.setName(name);
+		if (value != null)
+			c.setNodeRepresentation(value);
+		
 		return c;
 	}
 	
