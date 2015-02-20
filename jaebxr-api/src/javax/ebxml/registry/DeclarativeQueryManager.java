@@ -26,12 +26,14 @@ public class DeclarativeQueryManager extends QueryManager implements javax.xml.r
 
 	private javax.xml.registry.DeclarativeQueryManager dqm = null;
 
-	private SOAPMessenger msgr = null;
+	private SOAPMessenger msgr = ConfigurationFactory.getInstance().getSOAPMessenger();
 	
 	public DeclarativeQueryManager(javax.xml.registry.RegistryService rs) throws UnsupportedCapabilityException, JAXRException {
 		super();
-		this.dqm = rs.getDeclarativeQueryManager();
-		this.setRegistryService(rs);
+		if (rs != null) {
+			this.dqm = rs.getDeclarativeQueryManager();
+			this.setRegistryService(rs);
+		}
 	}
 
 	public void setDeclarativeQueryManager(javax.xml.registry.DeclarativeQueryManager dqm) {
