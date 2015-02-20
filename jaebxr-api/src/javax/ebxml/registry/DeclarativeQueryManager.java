@@ -1,6 +1,7 @@
 package javax.ebxml.registry;
 
 import java.math.BigInteger;
+import java.util.Collection;
 
 import javax.ebxml.registry.soap.BindingUtility;
 import javax.ebxml.registry.soap.SOAPMessenger;
@@ -105,6 +106,49 @@ public class DeclarativeQueryManager extends QueryManager implements javax.xml.r
 		aqr.setFederated(false);
 		
 		aqr.setAdhocQuery(query);
+		aqr.setResponseOption(rot);
+		aqr.setRequestSlotList(slt);
+
+		RegistryResponseType ebResp = null;
+
+		try {
+			RegistryResponseHolder resp = msgr.sendSoapRequest(BindingUtility.getInstance().marshalObject(aqr));
+			ebResp = resp.getRegistryResponseType();
+		} catch (JAXBException e) {
+			throw new JAebXRException(e);
+		} catch (RegistryException e) {
+			throw new JAebXRException(e);
+		} catch (JAXRException e) {
+			throw new JAebXRException(e);
+		}
+
+		return ebResp;
+	}
+	
+	public RegistryResponseType executeStoredQuery(Collection<SlotType1> params) throws JAebXRException {
+		ValueListType vlt = rimFac.createValueListType();
+		vlt.getValue().add("true");
+		
+		SlotType1 st = rimFac.createSlotType1();
+		st.setName(CanonicalConstants.IMPL_SLOT_CREATE_HTTP_SESSION);
+		st.setValueList(vlt);
+		
+		SlotListType slt = rimFac.createSlotListType();
+		slt.getSlot().add(st);
+		slt.getSlot().addAll(params);
+
+		ResponseOptionType rot = queryFac.createResponseOptionType();
+		rot.setReturnComposedObjects(true);
+		rot.setReturnType(ReturnType.LEAF_CLASS_WITH_REPOSITORY_ITEM);
+		
+		AdhocQueryRequest aqr = queryFac.createAdhocQueryRequest();
+
+		aqr.setId(createUUID());
+		
+		aqr.setMaxResults(BigInteger.valueOf(-1));
+		aqr.setStartIndex(BigInteger.valueOf(0));
+		aqr.setFederated(false);
+		
 		aqr.setResponseOption(rot);
 		aqr.setRequestSlotList(slt);
 
