@@ -26,6 +26,7 @@ import org.oasis.ebxml.registry.bindings.rim.ClassificationSchemeType;
 import org.oasis.ebxml.registry.bindings.rim.IdentifiableType;
 import org.oasis.ebxml.registry.bindings.rim.RegistryObjectType;
 import org.oasis.ebxml.registry.bindings.rim.SlotType1;
+import org.oasis.ebxml.registry.bindings.rim.UserType;
 import org.oasis.ebxml.registry.bindings.rim.ValueListType;
 
 public class BusinessQueryManager extends QueryManager implements javax.xml.registry.BusinessQueryManager {
@@ -207,6 +208,28 @@ public class BusinessQueryManager extends QueryManager implements javax.xml.regi
 			aeList = null;
 		
 		return aeList;
+	}
+	
+	public UserType getCallersUser() throws JAebXRException {
+		AdhocQueryType storedQuery = rimFac.createAdhocQueryType();
+		storedQuery.setId(CanonicalConstants.CANONICAL_QUERY_GetCallersUser);
+
+		AdhocQueryResponse rr = (AdhocQueryResponse) dqm.executeQuery(storedQuery);		
+
+		UserType res = null;
+		
+		if (rr.getStatus().equals(CanonicalConstants.CANONICAL_RESPONSE_STATUS_TYPE_LID_Success)) {
+			Iterator<JAXBElement<? extends IdentifiableType>> i = rr.getRegistryObjectList().getIdentifiable().iterator();
+			if (i.hasNext()) {
+				res = (UserType) i.next().getValue();
+			}
+			
+	        if (i.hasNext()) {
+	            throw new JAebXRException("ClassificationScheme multiple match");
+	        }
+		}
+		
+		return res;
 	}
 	
 	public ClassificationSchemeType getClassificationSchemesById(String id) throws JAebXRException {
