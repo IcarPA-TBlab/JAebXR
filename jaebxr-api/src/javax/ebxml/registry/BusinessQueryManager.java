@@ -202,6 +202,24 @@ public class BusinessQueryManager extends QueryManager implements javax.xml.regi
 		return roList;
 	}
 
+	public Collection<String> findRegistryObjectsByNamePattern(String namePattern) throws JAebXRException {
+        String sqlQuery = "SELECT ro.id FROM RegistryObject ro, Name_ nm WHERE nm.value LIKE '" + namePattern + "' AND ro.id = nm.parent";
+        
+        AdhocQueryType q = dqm.createQuery(CanonicalConstants.CANONICAL_QUERY_LANGUAGE_LID_SQL_92, sqlQuery);
+        AdhocQueryResponse rr = (AdhocQueryResponse) dqm.executeQuery(q);
+        
+        Collection<String> res = new ArrayList<String>();
+        
+		if (rr.getStatus().equals(CanonicalConstants.CANONICAL_RESPONSE_STATUS_TYPE_LID_Success)) {
+			Iterator<JAXBElement<? extends IdentifiableType>> i = rr.getRegistryObjectList().getIdentifiable().iterator();			
+			while (i.hasNext()) {
+				res.add((String) i.next().getValue().getId());
+			}
+		}
+       
+		return res;
+	}
+	
 	public Collection<AuditableEventType> getAuditTrailForRegistryObject(String id) throws JAebXRException {
 		ValueListType vlt = rimFac.createValueListType();
 		vlt.getValue().add(id);
