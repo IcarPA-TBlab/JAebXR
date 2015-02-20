@@ -203,7 +203,7 @@ public class BusinessQueryManager extends QueryManager implements javax.xml.regi
 	}
 
 	public Collection<String> findRegistryObjectsByNamePattern(String namePattern) throws JAebXRException {
-        String sqlQuery = "SELECT ro.id FROM RegistryObject ro, Name_ nm WHERE nm.value LIKE '" + namePattern + "' AND ro.id = nm.parent";
+        String sqlQuery = "SELECT ro.* FROM RegistryObject ro, Name_ nm WHERE nm.value LIKE '" + namePattern + "' AND ro.id = nm.parent";
         
         AdhocQueryType q = dqm.createQuery(CanonicalConstants.CANONICAL_QUERY_LANGUAGE_LID_SQL_92, sqlQuery);
         AdhocQueryResponse rr = (AdhocQueryResponse) dqm.executeQuery(q);
@@ -329,9 +329,11 @@ public class BusinessQueryManager extends QueryManager implements javax.xml.regi
 		return res;
 	}
 
-	// TODO
 	public RegistryObjectType getRegistryObjectType(String id, String objectType) throws JAebXRException {
-		throw new JAebXRException("Not yet implemented!");
+		RegistryObjectType res = getRegistryObjectType(id);
+		if (res.getObjectType().equals(objectType))
+			return res;
+		return null;
 	}
 	
 	// TODO
