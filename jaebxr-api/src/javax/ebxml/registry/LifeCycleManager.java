@@ -1,6 +1,8 @@
 package javax.ebxml.registry;
 
 import java.io.StringWriter;
+import java.net.MalformedURLException;
+import java.net.URL;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
@@ -8,6 +10,7 @@ import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Locale;
+import java.util.Map;
 
 import javax.activation.DataHandler;
 import javax.ebxml.registry.soap.BindingUtility;
@@ -122,6 +125,10 @@ public class LifeCycleManager extends CanonicalConstants implements javax.xml.re
     	return rimFac.createAssociation(a);
     }
     
+    public AssociationType1 createAssociationType(RegistryObjectType srcId, RegistryObjectType desId, ClassificationNodeType type) {
+    	return createAssociationType(srcId.getId(), desId.getId(), null, null, type.getId());
+    }
+    
     public AssociationType1 createAssociationType(String srcId, String desId, String type) {
     	return createAssociationType(srcId, desId, null, null, type);
     }
@@ -163,12 +170,17 @@ public class LifeCycleManager extends CanonicalConstants implements javax.xml.re
 		return lcm.createClassification(arg0, arg1, arg2);
 	}
 
-	public ClassificationType createClassificationType(ClassificationNodeType cn) {
-		ClassificationType c = rimFac.createClassificationType();
-		return c;
-	}
-	
-	public ClassificationType createClassificationType(ClassificationSchemeType scheme, String name, String value) {
+    public JAXBElement<ClassificationNodeType> createClassificationNode(ClassificationNodeType cs) {
+    	JAXBElement<ClassificationNodeType> eb = rimFac.createClassificationNode(cs);
+    	return eb;
+    }
+    
+    public JAXBElement<ClassificationType> createClassification(ClassificationType cs) {
+    	JAXBElement<ClassificationType> eb = rimFac.createClassification(cs);
+    	return eb;
+    }
+  
+    public ClassificationType createClassificationType(ClassificationSchemeType scheme, String name, String value) {
 		return createClassificationType(scheme, createInternationalStringType(name), value);
 	}
 
@@ -350,25 +362,60 @@ public class LifeCycleManager extends CanonicalConstants implements javax.xml.re
 		return lcm.createExtrinsicObject(arg0);
 	}
 
-	public ExtrinsicObjectType createExtrinsicObjectType() {
-		return createExtrinsicObjectType((String)null);
-	}
-	
-	public ExtrinsicObjectType createExtrinsicObjectType(String id) {
-		ExtrinsicObjectType eo = rimFac.createExtrinsicObjectType();
-		eo.setId(this.createUUID());
-		if (id != null) {
-			eo.setObjectType(id);
-		}
-		return eo;
+	public JAXBElement<ExtrinsicObjectType> createExtrinsicObject(ExtrinsicObjectType eo) {
+    	JAXBElement<ExtrinsicObjectType> eb = rimFac.createExtrinsicObject(eo);
+    	return eb;
+    }
+
+	// TODO
+	public DataHandler getRepositoryItem(String eoID) {
+		return null;
 	}
 
-	public ExtrinsicObjectType createExtrinsicObjectType(RegistryObjectType ro) {
+	public ExtrinsicObjectType createExtrinsicObjectType(URL url) {
+		return createExtrinsicObjectType(url, null, null);
+	}
+	
+	public ExtrinsicObjectType createExtrinsicObjectType(URL url, String name) {
+		return createExtrinsicObjectType(url, name, name);
+	}
+
+	public ExtrinsicObjectType createExtrinsicObjectType(URL url, String name, String description) {
+		
 		ExtrinsicObjectType eo = rimFac.createExtrinsicObjectType();
 		eo.setId(this.createUUID());
-		if ((ro != null)  && (ro.getId() != null)) {
-			eo.setObjectType(ro.getId());
-		}
+		
+		DataHandler dh = new DataHandler(url);		
+		eo.setMimeType(dh.getContentType());
+		eo.setObjectType("urn:oasis:names:tc:ebxml-regrep:ObjectType:RegistryObject:ExtrinsicObject");
+		
+		if (name != null)
+			eo.setName(createInternationalStringType(name));
+		if (description != null)
+			eo.setDescription(createInternationalStringType(description));
+		
+		ValueListType v1 = rimFac.createValueListType();
+		v1.getValue().add(url.getPath());
+
+		ValueListType v2 = rimFac.createValueListType();
+		v2.getValue().add(url.toExternalForm());
+		
+		SlotType1 s1 = rimFac.createSlotType1();
+		s1.setName("urn:oasis:names:tc:ebxml-regrep:rim:RegistryObject:locator");
+		s1.setValueList(v1);
+		
+		SlotType1 s2 = rimFac.createSlotType1();
+		s2.setName("urn:oasis:names:tc:ebxml-regrep:rim:RegistryObject:contentLocator");
+		s2.setValueList(v1);
+		
+		SlotType1 s3 = rimFac.createSlotType1();
+		s3.setName("URL");
+		s3.setValueList(v2);
+		
+		eo.getSlot().add(s1);
+		eo.getSlot().add(s2);
+		eo.getSlot().add(s3);
+		
 		return eo;
 	}
 
@@ -563,6 +610,41 @@ public class LifeCycleManager extends CanonicalConstants implements javax.xml.re
     	return ol;
     }
 
+    public JAXBElement<RegistryObjectType> createRegistryObject(RegistryObjectType r) {
+    	JAXBElement<RegistryObjectType> eb = rimFac.createRegistryObject(r);
+    	return eb;
+    }
+
+    public RegistryObjectType createRegistryObjectType() {
+    	return createRegistryObjectType((InternationalStringType)null, (InternationalStringType)null);
+    }
+
+    public RegistryObjectType createRegistryObjectType(String name) {
+    	return createRegistryObjectType(name, null);
+    }
+    
+    public RegistryObjectType createRegistryObjectType(String name, String desc) {
+    	InternationalStringType n = null;
+    	InternationalStringType d = null;
+    	
+    	if (name != null)
+    		n = createInternationalStringType(name);
+    	if (desc != null)
+    		d = createInternationalStringType(desc);
+    	
+    	return createRegistryObjectType(n, d);
+    }
+   
+    public RegistryObjectType createRegistryObjectType(InternationalStringType name, InternationalStringType desc) {
+    	RegistryObjectType ro = rimFac.createRegistryObjectType();
+    	ro.setId(this.createUUID());
+    	if (name != null)
+    		ro.setName(name);
+    	if (desc != null)
+    		ro.setDescription(desc);
+    	return ro;
+    }
+
 	@Override
 	public RegistryPackage createRegistryPackage(String arg0)
 			throws JAXRException {
@@ -575,7 +657,12 @@ public class LifeCycleManager extends CanonicalConstants implements javax.xml.re
 		return lcm.createRegistryPackage(arg0);
 	}
 
-	public RegistryPackageType createRegistryPackageType(String name) {
+    public JAXBElement<RegistryPackageType> createRegistryPackage(RegistryPackageType r) {
+    	JAXBElement<RegistryPackageType> eb = rimFac.createRegistryPackage(r);
+    	return eb;
+    }
+    
+    public RegistryPackageType createRegistryPackageType(String name) {
 		return createRegistryPackageType(createInternationalStringType(name));
 	}
 
@@ -768,7 +855,7 @@ public class LifeCycleManager extends CanonicalConstants implements javax.xml.re
     
     public AssociationType1 joinFederation(String fedId, String regId) throws JAebXRException {
     	AssociationType1 a = createAssociationType(fedId, regId, CANONICAL_ASSOCIATION_TYPE_CODE_HasFederationMember);  	
-    	saveObject(createAssociation(a));
+    	saveObjectType(createAssociation(a));
     	return a;
     }
     
@@ -796,11 +883,44 @@ public class LifeCycleManager extends CanonicalConstants implements javax.xml.re
         bu.addSlotsToRequest(req, slotMap);
     }
 
-    public RegistryResponseType saveObject(RegistryType cn) throws JAebXRException {
+    public RegistryResponseType saveObjectType(ClassificationSchemeType cs) throws JAebXRException {
+    	JAXBElement<ClassificationSchemeType> eb = createClassificationScheme(cs);
+    	return saveObjectType(eb);
+    }
+    
+    public RegistryResponseType saveObjectType(RegistryType cn) throws JAebXRException {
     	JAXBElement<RegistryType> eb = createRegistry(cn);
-    	return saveObject(eb);
+    	return saveObjectType(eb);
     }
   
+    public RegistryResponseType saveObjectType(ExtrinsicObjectType eo) throws JAebXRException {
+    	JAXBElement<ExtrinsicObjectType> eb = createExtrinsicObject(eo);
+    	Map<String, DataHandler> m = new HashMap<String, DataHandler>();
+    	String urlString = null;
+    	List<SlotType1> sl = eo.getSlot();
+    	Iterator<SlotType1> i = sl.iterator();
+    	while (i.hasNext()) {
+    		SlotType1 s = (SlotType1) i.next();
+    		if (s.getName().equals("URL")) {
+    			urlString = s.getValueList().getValue().get(0);
+    			//System.err.println("Attach: " + urlString);
+    			break;
+    		}
+    	}
+    	if (urlString != null)
+			try {
+				m.put(eo.getId(), new DataHandler(new URL(urlString)));
+			} catch (MalformedURLException e) {
+				throw new JAebXRException(e);
+			}
+    	return saveObjectType(eb, m);
+    }
+    
+    public RegistryResponseType saveObjectType(RegistryPackageType cn) throws JAebXRException {
+    	JAXBElement<RegistryPackageType> eb = createRegistryPackage(cn);
+    	return saveObjectType(eb);
+    }
+
     public RegistryResponseType saveFederations(Collection<FederationType> f) throws JAebXRException {
     	Collection <JAXBElement<? extends IdentifiableType>> list = new ArrayList<JAXBElement<? extends IdentifiableType>>();
     	Iterator<FederationType> i = f.iterator();
@@ -808,16 +928,58 @@ public class LifeCycleManager extends CanonicalConstants implements javax.xml.re
     		list.add(this.createFederation((FederationType) i.next()));
     	};
     	SubmitObjectsRequest sreq = createSubmitObjectsRequest(list);
-    	RegistryResponseType resp = saveObjects(sreq);
+    	RegistryResponseType resp = saveObjectTypes(sreq);
     	return resp;    	
     }
     
-    public RegistryResponseType saveObject(JAXBElement<? extends IdentifiableType> eb) throws JAebXRException {
-    	SubmitObjectsRequest sreq = createSubmitObjectsRequest(eb);
-    	RegistryResponseType resp = saveObjects(sreq);
-    	return resp;
+    public RegistryResponseType saveObjectType(JAXBElement<? extends IdentifiableType> eb) throws JAebXRException {
+    	return saveObjectType(eb, null);
     }
 
+    public RegistryResponseType saveObjectType(JAXBElement<? extends IdentifiableType> eb, Map<String, DataHandler> attachments) throws JAebXRException {
+    	SubmitObjectsRequest sreq = createSubmitObjectsRequest(eb);
+    	RegistryResponseType resp = saveObjectTypes(sreq, attachments);
+    	return resp;
+    }
+    
+    public RegistryResponseType saveObjectTypes(Collection<? extends IdentifiableType> c) throws JAebXRException {
+    	Collection <JAXBElement<? extends IdentifiableType>> list = new ArrayList<JAXBElement<? extends IdentifiableType>>();
+    	
+    	Iterator<? extends IdentifiableType> i = c.iterator();
+    	while (i.hasNext()) {
+    		Object o = i.next();
+    		JAXBElement<? extends IdentifiableType> eb = null;
+    		
+    		if (o instanceof AssociationType1)
+    			eb = createAssociation((AssociationType1) o);
+    		else if (o instanceof ClassificationNodeType)
+    			eb = createClassificationNode((ClassificationNodeType) o);
+    		else if (i instanceof ExtrinsicObjectType)
+    			eb = createExtrinsicObject((ExtrinsicObjectType) o);
+    		else if (o instanceof FederationType)
+    			eb = createFederation((FederationType) o);
+    		else if (o instanceof RegistryPackageType)
+    			eb = createRegistryPackage((RegistryPackageType) o);
+    		    		
+    		list.add(eb);
+    	};
+    	SubmitObjectsRequest sreq = createSubmitObjectsRequest(list);
+    	RegistryResponseType resp = saveObjectTypes(sreq);
+    	return resp;    	
+    }
+    
+    public RegistryResponseType deleteObjectType(String id) throws JAebXRException {
+    	RemoveObjectsRequest sreq = createRemoveObjectsRequest(id);
+    	RegistryResponseType resp = deleteObjectTypes(sreq);
+    	return resp;    	
+    }
+
+    public RegistryResponseType deleteObjectTypes(Collection<String> c) throws JAebXRException {
+    	RemoveObjectsRequest sreq = createRemoveObjectsRequest(c);
+    	RegistryResponseType resp = deleteObjectTypes(sreq);
+    	return resp;    	
+    }
+    
     /*
     public RegistryResponseType saveObject(Collection <JAXBElement<? extends IdentifiableType>> ebl) throws RegistryException {
     	SubmitObjectsRequest sreq = createSubmitObjectsRequest(ebl);
@@ -826,15 +988,23 @@ public class LifeCycleManager extends CanonicalConstants implements javax.xml.re
     }
     */
     
-    public RegistryResponseType saveObjects(SubmitObjectsRequest req) throws JAebXRException {
-    	return submitObjects(req);
+    public RegistryResponseType saveObjectTypes(SubmitObjectsRequest req) throws JAebXRException {
+    	return saveObjectTypes(req, null);
     }
     
-    public RegistryResponseType deleteObjects(RemoveObjectsRequest req) throws JAebXRException {
-    	return submitObjects(req);
+    public RegistryResponseType saveObjectTypes(SubmitObjectsRequest req, Map<String, DataHandler> attachments) throws JAebXRException {
+    	return submitObjectTypes(req, attachments);
     }
     
-    private RegistryResponseType submitObjects(RegistryRequestType req) throws JAebXRException {
+    public RegistryResponseType deleteObjectTypes(RemoveObjectsRequest req) throws JAebXRException {
+    	return submitObjectTypes(req);
+    }
+    
+    private RegistryResponseType submitObjectTypes(RegistryRequestType req) throws JAebXRException {
+    	return submitObjectTypes(req, null);
+    }
+    
+    private RegistryResponseType submitObjectTypes(RegistryRequestType req, Map<String, DataHandler> attachments) throws JAebXRException {
         try {
         	addCreateSessionSlot(req);
 
@@ -844,7 +1014,7 @@ public class LifeCycleManager extends CanonicalConstants implements javax.xml.re
             marshaller.marshal(req, sw);
             
             String requestString = sw.toString();
-            RegistryResponseHolder resp = msgr.sendSoapRequest(requestString);
+            RegistryResponseHolder resp = msgr.sendSoapRequest(requestString, attachments);
             
             return resp.getRegistryResponseType();
         }
