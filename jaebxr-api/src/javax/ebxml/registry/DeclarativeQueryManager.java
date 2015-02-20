@@ -78,10 +78,10 @@ public class DeclarativeQueryManager extends QueryManager implements javax.xml.r
 	}
 
 	public RegistryResponseType executeQuery(AdhocQueryType query) throws JAebXRException {
-		ResponseOptionType rot = queryFac.createResponseOptionType();
-		rot.setReturnComposedObjects(true);
-		rot.setReturnType(ReturnType.LEAF_CLASS);
-		
+		return executeQuery(query, ReturnType.LEAF_CLASS);
+	}
+	
+	public RegistryResponseType executeQuery(AdhocQueryType query, ReturnType rType) throws JAebXRException {
 		ValueListType vlt = rimFac.createValueListType();
 		vlt.getValue().add("true");
 		
@@ -92,6 +92,10 @@ public class DeclarativeQueryManager extends QueryManager implements javax.xml.r
 		SlotListType slt = rimFac.createSlotListType();
 		slt.getSlot().add(st);
 
+		ResponseOptionType rot = queryFac.createResponseOptionType();
+		rot.setReturnComposedObjects(true);
+		rot.setReturnType(rType);
+		
 		AdhocQueryRequest aqr = queryFac.createAdhocQueryRequest();
 		
 		aqr.setId(createUUID());

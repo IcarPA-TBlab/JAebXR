@@ -1,5 +1,6 @@
 package javax.ebxml.registry;
 
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Iterator;
 import java.util.StringTokenizer;
@@ -19,10 +20,13 @@ import org.oasis.ebxml.registry.bindings.query.RegistryObjectQueryType;
 import org.oasis.ebxml.registry.bindings.query.SimpleFilterType;
 import org.oasis.ebxml.registry.bindings.query.StringFilterType;
 import org.oasis.ebxml.registry.bindings.rim.AdhocQueryType;
+import org.oasis.ebxml.registry.bindings.rim.AuditableEventType;
 import org.oasis.ebxml.registry.bindings.rim.ClassificationNodeType;
 import org.oasis.ebxml.registry.bindings.rim.ClassificationSchemeType;
 import org.oasis.ebxml.registry.bindings.rim.IdentifiableType;
 import org.oasis.ebxml.registry.bindings.rim.RegistryObjectType;
+import org.oasis.ebxml.registry.bindings.rim.SlotType1;
+import org.oasis.ebxml.registry.bindings.rim.ValueListType;
 
 public class BusinessQueryManager extends QueryManager implements javax.xml.registry.BusinessQueryManager {
 
@@ -118,16 +122,9 @@ public class BusinessQueryManager extends QueryManager implements javax.xml.regi
 		ClassificationSchemeQueryType q = queryFac.createClassificationSchemeQueryType();
 		q.setPrimaryFilter(f);
 		JAXBElement<ClassificationSchemeQueryType> ebq = queryFac.createClassificationSchemeQuery(q);
-				
-		//AdhocQueryResponse rr = (AdhocQueryResponse)submitRSFilterQuery(ebq);
 
 		AdhocQueryType aqt = dqm.createQuery(CanonicalConstants.CANONICAL_QUERY_LANGUAGE_LID_ebRSFilterQuery, ebq);
 		AdhocQueryResponse rr = (AdhocQueryResponse) dqm.executeQuery(aqt);
-
-		/*
-		String sqlQuery = "SELECT obj.* from ClassificationScheme obj , Name_ nm WHERE ((nm.parent = obj.id) AND (nm.value = '" + name + "'))";	
-		AdhocQueryResponse rr = (AdhocQueryResponse)submitSqlAdhocQuery(sqlQuery);		
-		*/
 
 		ClassificationSchemeType res = null;
 		
@@ -169,15 +166,8 @@ public class BusinessQueryManager extends QueryManager implements javax.xml.regi
 		q.setPrimaryFilter(cf);
 		JAXBElement<ClassificationNodeQueryType> ebq = queryFac.createClassificationNodeQuery(q);
 
-		// AdhocQueryResponse rr = (AdhocQueryResponse)submitRSFilterQuery(ebq);
-
 		AdhocQueryType aqt = dqm.createQuery(CanonicalConstants.CANONICAL_QUERY_LANGUAGE_LID_ebRSFilterQuery, ebq);
 		AdhocQueryResponse rr = (AdhocQueryResponse) dqm.executeQuery(aqt);
-
-		/*
-		String sqlQuery = "SELECT cn.* FROM ClassificationNode cn WHERE parent = '" + parent + "' AND code = '" + code +"'";		
-		AdhocQueryResponse rr = (AdhocQueryResponse)submitSqlAdhocQuery(sqlQuery);
-		*/
 		
 		ClassificationNodeType res = null;
 		
@@ -189,6 +179,35 @@ public class BusinessQueryManager extends QueryManager implements javax.xml.regi
 		}
 
 		return res;
+	}
+	
+	// TODO
+	public Collection<AuditableEventType> getAuditTrailForRegistryObject(String id) throws JAebXRException {
+		ValueListType vlt = rimFac.createValueListType();
+		vlt.getValue().add(id);
+
+		SlotType1 st = rimFac.createSlotType1();
+		st.setName("$lid");
+		st.setValueList(vlt);
+		
+		AdhocQueryType storedQuery = rimFac.createAdhocQueryType();
+		storedQuery.setId(CanonicalConstants.CANONICAL_QUERY_GetAuditTrailForRegistryObject);
+		storedQuery.getSlot().add(st);
+
+		AdhocQueryResponse rr = (AdhocQueryResponse) dqm.executeQuery(storedQuery);		
+		Collection<AuditableEventType> aeList = new ArrayList<AuditableEventType>();
+		
+		if (rr.getStatus().equals(CanonicalConstants.CANONICAL_RESPONSE_STATUS_TYPE_LID_Success)) {
+			Iterator<JAXBElement<? extends IdentifiableType>> i = rr.getRegistryObjectList().getIdentifiable().iterator();			
+			while (i.hasNext()) {
+				aeList.add((AuditableEventType) i.next().getValue());
+			}
+		}
+
+		if (aeList.size() == 0)
+			aeList = null;
+		
+		return aeList;
 	}
 	
 	public RegistryObjectType getRegistryObjectType(String id) throws JAebXRException {
@@ -219,7 +238,7 @@ public class BusinessQueryManager extends QueryManager implements javax.xml.regi
 		
 		return res;
 	}
-	
+
 	// TODO
 	public RegistryObjectType getRegistryObjectType(String id, String objectType) throws JAebXRException {
 		throw new JAebXRException("Not yet implemented!");
@@ -244,117 +263,4 @@ public class BusinessQueryManager extends QueryManager implements javax.xml.regi
 	public Collection<RegistryObjectType> getRegistryObjectTypes(Collection<String> objectKeys, String objectType) throws JAebXRException {
 		throw new JAebXRException("Not yet implemented!");
 	}
-	
-	/*
-	private RegistryResponseType submitRSFilterQuery(JAXBElement<? extends FilterQueryType> ebq) throws JAebXRException {
-		QueryExpressionType qet = rimFac.createQueryExpressionType();
-		qet.setQueryLanguage(CanonicalConstants.CANONICAL_QUERY_LANGUAGE_LID_ebRSFilterQuery);
-		
-		try {
-			qet.getContent().add(BindingUtility.getInstance().marshalObject(ebq));
-		} catch (JAXBException e1) {
-			throw new JAebXRException(e1);
-		}
-
-		AdhocQueryType aqt = rimFac.createAdhocQueryType();
-		aqt.setId(createUUID());		
-		aqt.setQueryExpression(qet);
-
-		ResponseOptionType rot = queryFac.createResponseOptionType();
-		rot.setReturnComposedObjects(true);
-		rot.setReturnType(ReturnType.LEAF_CLASS);
-		
-		ValueListType vlt = rimFac.createValueListType();
-		vlt.getValue().add("true");
-		
-		SlotType1 st = rimFac.createSlotType1();
-		st.setName(CanonicalConstants.IMPL_SLOT_CREATE_HTTP_SESSION);
-		st.setValueList(vlt);
-		
-		SlotListType slt = rimFac.createSlotListType();
-		slt.getSlot().add(st);
-
-		AdhocQueryRequest aqr = queryFac.createAdhocQueryRequest();
-		
-		aqr.setId(createUUID());
-		
-		aqr.setMaxResults(BigInteger.valueOf(-1));
-		aqr.setStartIndex(BigInteger.valueOf(0));
-		aqr.setFederated(false);
-		
-		aqr.setAdhocQuery(aqt);
-		aqr.setResponseOption(rot);
-		aqr.setRequestSlotList(slt);
-
-		RegistryResponseType ebResp = null;
-
-		try {
-			RegistryResponseHolder resp = msgr.sendSoapRequest(BindingUtility.getInstance().marshalObject(aqr));
-			ebResp = resp.getRegistryResponseType();
-		} catch (JAXBException e) {
-			throw new JAebXRException(e);
-		} catch (RegistryException e) {
-			throw new JAebXRException(e);
-		} catch (JAXRException e) {
-			throw new JAebXRException(e);
-		}
-
-		return ebResp;
-	}
-	
-	private RegistryResponseType submitSqlAdhocQuery(String sqlQuery) throws JAebXRException {
-		QueryExpressionType qet = rimFac.createQueryExpressionType();
-		qet.setQueryLanguage(CanonicalConstants.CANONICAL_QUERY_LANGUAGE_LID_SQL_92);
-		qet.getContent().add(sqlQuery);
-
-		AdhocQueryType aqt = rimFac.createAdhocQueryType();
-		aqt.setId(createUUID());		
-		aqt.setQueryExpression(qet);
-
-		ResponseOptionType rot = queryFac.createResponseOptionType();
-		rot.setReturnComposedObjects(true);
-		rot.setReturnType(ReturnType.LEAF_CLASS);
-		
-		ValueListType vlt = rimFac.createValueListType();
-		vlt.getValue().add("true");
-		
-		SlotType1 st = rimFac.createSlotType1();
-		st.setName(CanonicalConstants.IMPL_SLOT_CREATE_HTTP_SESSION);
-		st.setValueList(vlt);
-		
-		SlotListType slt = rimFac.createSlotListType();
-		slt.getSlot().add(st);
-
-		AdhocQueryRequest aqr = queryFac.createAdhocQueryRequest();
-		
-		aqr.setId(createUUID());
-		
-		aqr.setMaxResults(BigInteger.valueOf(-1));
-		aqr.setStartIndex(BigInteger.valueOf(0));
-		aqr.setFederated(false);
-		
-		aqr.setAdhocQuery(aqt);
-		aqr.setResponseOption(rot);
-		aqr.setRequestSlotList(slt);
-		
-		try {
-			StringWriter sw = new StringWriter();
-
-			Marshaller marshaller = BindingUtility.getInstance().getJAXBContext().createMarshaller();
-			marshaller.setProperty(Marshaller.JAXB_FORMATTED_OUTPUT, Boolean.TRUE);
-			marshaller.marshal(aqr, sw);
-			
-			RegistryResponseHolder resp = msgr.sendSoapRequest(sw.toString());
-			RegistryResponseType ebResp = resp.getRegistryResponseType();
-
-			return ebResp;
-		} catch (JAXBException e) {
-			throw new JAebXRException(e);
-		} catch (RegistryException e) {
-			throw new JAebXRException(e);
-		} catch (JAXRException e) {
-			throw new JAebXRException(e);
-		}
-	}
-	*/
 }
