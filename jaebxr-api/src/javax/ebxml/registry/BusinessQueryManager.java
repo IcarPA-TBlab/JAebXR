@@ -183,10 +183,17 @@ public class BusinessQueryManager extends QueryManager implements javax.xml.regi
 	}
 	
 	public Collection<RegistryObjectType> findAllMyObjects() throws JAebXRException {
-		AdhocQueryType storedQuery = rimFac.createAdhocQueryType();
-		storedQuery.setId(CanonicalConstants.CANONICAL_QUERY_FindAllMyObjects);
-
-		AdhocQueryResponse rr = (AdhocQueryResponse) dqm.executeQuery(storedQuery);		
+		ValueListType vl1 = rimFac.createValueListType();
+		vl1.getValue().add(CanonicalConstants.CANONICAL_QUERY_FindAllMyObjects);
+		
+		SlotType1 s1 = rimFac.createSlotType1();
+		s1.setName("urn:oasis:names:tc:ebxml-regrep:rs:AdhocQueryRequest:queryId");
+		s1.setValueList(vl1);
+		
+		Collection<SlotType1> params = new ArrayList<SlotType1>();
+		params.add(s1);
+		
+		AdhocQueryResponse rr = (AdhocQueryResponse) dqm.executeStoredQuery(params);		
 		Collection<RegistryObjectType> roList = new ArrayList<RegistryObjectType>();
 		
 		if (rr.getStatus().equals(CanonicalConstants.CANONICAL_RESPONSE_STATUS_TYPE_LID_Success)) {
@@ -221,18 +228,26 @@ public class BusinessQueryManager extends QueryManager implements javax.xml.regi
 	}
 	
 	public Collection<AuditableEventType> getAuditTrailForRegistryObject(String id) throws JAebXRException {
-		ValueListType vlt = rimFac.createValueListType();
-		vlt.getValue().add(id);
-
-		SlotType1 st = rimFac.createSlotType1();
-		st.setName("$lid");
-		st.setValueList(vlt);
+		ValueListType vl1 = rimFac.createValueListType();
+		vl1.getValue().add(CanonicalConstants.CANONICAL_QUERY_GetAuditTrailForRegistryObject);
 		
-		AdhocQueryType storedQuery = rimFac.createAdhocQueryType();
-		storedQuery.setId(CanonicalConstants.CANONICAL_QUERY_GetAuditTrailForRegistryObject);
-		storedQuery.getSlot().add(st);
+		SlotType1 s1 = rimFac.createSlotType1();
+		s1.setName("urn:oasis:names:tc:ebxml-regrep:rs:AdhocQueryRequest:queryId");
+		s1.setValueList(vl1);
 
-		AdhocQueryResponse rr = (AdhocQueryResponse) dqm.executeQuery(storedQuery);		
+		ValueListType vl2 = rimFac.createValueListType();
+		vl2.getValue().add(id);
+
+		SlotType1 s2 = rimFac.createSlotType1();
+		s2.setName("$lid");
+		s2.setValueList(vl2);
+		
+		Collection<SlotType1> params = new ArrayList<SlotType1>();
+		params.add(s1);
+		params.add(s2);
+		
+		AdhocQueryResponse rr = (AdhocQueryResponse) dqm.executeStoredQuery(params);
+			
 		Collection<AuditableEventType> aeList = new ArrayList<AuditableEventType>();
 		
 		if (rr.getStatus().equals(CanonicalConstants.CANONICAL_RESPONSE_STATUS_TYPE_LID_Success)) {
@@ -249,11 +264,18 @@ public class BusinessQueryManager extends QueryManager implements javax.xml.regi
 	}
 	
 	public UserType getCallersUser() throws JAebXRException {
-		AdhocQueryType storedQuery = rimFac.createAdhocQueryType();
-		storedQuery.setId(CanonicalConstants.CANONICAL_QUERY_GetCallersUser);
-
-		AdhocQueryResponse rr = (AdhocQueryResponse) dqm.executeQuery(storedQuery);		
-
+		ValueListType vl1 = rimFac.createValueListType();
+		vl1.getValue().add(CanonicalConstants.CANONICAL_QUERY_GetCallersUser);
+		
+		SlotType1 s1 = rimFac.createSlotType1();
+		s1.setName("urn:oasis:names:tc:ebxml-regrep:rs:AdhocQueryRequest:queryId");
+		s1.setValueList(vl1);
+		
+		Collection<SlotType1> params = new ArrayList<SlotType1>();
+		params.add(s1);
+		
+		AdhocQueryResponse rr = (AdhocQueryResponse) dqm.executeStoredQuery(params);
+		
 		UserType res = null;
 		
 		if (rr.getStatus().equals(CanonicalConstants.CANONICAL_RESPONSE_STATUS_TYPE_LID_Success)) {
@@ -270,31 +292,34 @@ public class BusinessQueryManager extends QueryManager implements javax.xml.regi
 		return res;
 	}
 	
-	public ClassificationSchemeType getClassificationSchemesById(String id) throws JAebXRException {
-		ValueListType vlt = rimFac.createValueListType();
-		vlt.getValue().add(id);
-
-		SlotType1 st = rimFac.createSlotType1();
-		st.setName("$id");
-		st.setValueList(vlt);
+	public Collection<ClassificationSchemeType> getClassificationSchemesById(String id) throws JAebXRException {
+		ValueListType vl1 = rimFac.createValueListType();
+		vl1.getValue().add(CanonicalConstants.CANONICAL_QUERY_GetClassificationSchemesById);
 		
-		AdhocQueryType storedQuery = rimFac.createAdhocQueryType();
-		storedQuery.setId(CanonicalConstants.CANONICAL_QUERY_GetClassificationSchemesById);
-		storedQuery.getSlot().add(st);
+		SlotType1 s1 = rimFac.createSlotType1();
+		s1.setName("urn:oasis:names:tc:ebxml-regrep:rs:AdhocQueryRequest:queryId");
+		s1.setValueList(vl1);
 
-		AdhocQueryResponse rr = (AdhocQueryResponse) dqm.executeQuery(storedQuery);		
+		ValueListType vl2 = rimFac.createValueListType();
+		vl2.getValue().add(id);
+
+		SlotType1 s2 = rimFac.createSlotType1();
+		s2.setName("$id");
+		s2.setValueList(vl2);
 		
-		ClassificationSchemeType res = null;
+		Collection<SlotType1> params = new ArrayList<SlotType1>();
+		params.add(s1);
+		params.add(s2);
+		
+		AdhocQueryResponse rr = (AdhocQueryResponse) dqm.executeStoredQuery(params);	
+		
+		Collection<ClassificationSchemeType> res = new ArrayList<ClassificationSchemeType>();
 		
 		if (rr.getStatus().equals(CanonicalConstants.CANONICAL_RESPONSE_STATUS_TYPE_LID_Success)) {
 			Iterator<JAXBElement<? extends IdentifiableType>> i = rr.getRegistryObjectList().getIdentifiable().iterator();
-			if (i.hasNext()) {
-				res = (ClassificationSchemeType) i.next().getValue();
+			while (i.hasNext()) {				
+				res.add((ClassificationSchemeType) i.next().getValue());
 			}
-			
-	        if (i.hasNext()) {
-	            throw new JAebXRException("ClassificationScheme multiple match");
-	        }
 		}
 		
 		return res;
@@ -331,8 +356,9 @@ public class BusinessQueryManager extends QueryManager implements javax.xml.regi
 
 	public RegistryObjectType getRegistryObjectType(String id, String objectType) throws JAebXRException {
 		RegistryObjectType res = getRegistryObjectType(id);
-		if (res.getObjectType().equals(objectType))
-			return res;
+		if (res != null)
+			if (res.getObjectType().equals(objectType))
+				return res;
 		return null;
 	}
 	
