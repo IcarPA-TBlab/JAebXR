@@ -15,6 +15,7 @@ import org.oasis.ebxml.registry.bindings.query.AdhocQueryResponse;
 import org.oasis.ebxml.registry.bindings.query.ClassificationNodeQueryType;
 import org.oasis.ebxml.registry.bindings.query.ClassificationSchemeQueryType;
 import org.oasis.ebxml.registry.bindings.query.CompoundFilterType;
+import org.oasis.ebxml.registry.bindings.query.RegistryObjectQueryType;
 import org.oasis.ebxml.registry.bindings.query.SimpleFilterType;
 import org.oasis.ebxml.registry.bindings.query.StringFilterType;
 import org.oasis.ebxml.registry.bindings.rim.AdhocQueryType;
@@ -27,13 +28,21 @@ public class BusinessQueryManager extends QueryManager implements javax.xml.regi
 
 	private javax.xml.registry.BusinessQueryManager bqm = null;
 	private DeclarativeQueryManager dqm = null;
+
+	public BusinessQueryManager(DeclarativeQueryManager qm) throws JAXRException {
+		super();
+		this.dqm = qm;
+		this.setSOAPMessenger(ConfigurationFactory.getInstance().getSOAPMessenger());
+	}
 	
 	public BusinessQueryManager(javax.xml.registry.RegistryService rs) throws JAXRException {
 		super();
-		this.bqm = rs.getBusinessQueryManager();
-		this.dqm = (DeclarativeQueryManager) rs.getDeclarativeQueryManager();
-		this.setRegistryService(rs);
-		this.setQueryManager(bqm);
+		if (rs != null) {
+			this.bqm = rs.getBusinessQueryManager();
+	 		this.dqm = (DeclarativeQueryManager) rs.getDeclarativeQueryManager();
+			this.setRegistryService(rs);
+			this.setQueryManager(bqm);
+		}
 		this.setSOAPMessenger(ConfigurationFactory.getInstance().getSOAPMessenger());
 	}
 
@@ -182,34 +191,58 @@ public class BusinessQueryManager extends QueryManager implements javax.xml.regi
 		return res;
 	}
 	
-	// TODO
-	public RegistryObjectType getRegistryObjectType(String id) {
-		return null;
+	public RegistryObjectType getRegistryObjectType(String id) throws JAebXRException {
+		StringFilterType f = queryFac.createStringFilterType();		
+		f.setComparator(SimpleFilterType.Comparator.EQ);
+		f.setDomainAttribute("id");
+		f.setValue(id);
+
+		RegistryObjectQueryType roq = queryFac.createRegistryObjectQueryType();
+		roq.setPrimaryFilter(f);		
+		JAXBElement<RegistryObjectQueryType> ebq = queryFac.createRegistryObjectQuery(roq);
+		
+		AdhocQueryType aqt = dqm.createQuery(CanonicalConstants.CANONICAL_QUERY_LANGUAGE_LID_ebRSFilterQuery, ebq);
+		AdhocQueryResponse rr = (AdhocQueryResponse) dqm.executeQuery(aqt);
+
+		RegistryObjectType res = null;
+		
+		if (rr.getStatus().equals(CanonicalConstants.CANONICAL_RESPONSE_STATUS_TYPE_LID_Success)) {
+			Iterator<JAXBElement<? extends IdentifiableType>> i = rr.getRegistryObjectList().getIdentifiable().iterator();
+			if (i.hasNext()) {
+				res = (RegistryObjectType) i.next().getValue();
+			}
+			
+	        if (i.hasNext()) {
+	            throw new JAebXRException("ClassificationScheme multiple match");
+	        }
+		}
+		
+		return res;
 	}
 	
 	// TODO
-	public RegistryObjectType getRegistryObjectType(String id, String objectType) {
-		return null;
+	public RegistryObjectType getRegistryObjectType(String id, String objectType) throws JAebXRException {
+		throw new JAebXRException("Not yet implemented!");
 	}
 	
 	// TODO
-	public Collection<RegistryObjectType> getRegistryObjectTypes() {
-		return null;
+	public Collection<RegistryObjectType> getRegistryObjectTypes() throws JAebXRException {
+		throw new JAebXRException("Not yet implemented!");
 	}
 	
 	// TODO
-	public Collection<RegistryObjectType> getRegistryObjectTypes(String objectType) {
-		return null;
+	public Collection<RegistryObjectType> getRegistryObjectTypes(String objectType) throws JAebXRException {
+		throw new JAebXRException("Not yet implemented!");
 	}
 	
 	// TODO
-	public Collection<RegistryObjectType> getRegistryObjectTypes(Collection<String> objectKeys) {
-		return null;
+	public Collection<RegistryObjectType> getRegistryObjectTypes(Collection<String> objectKeys) throws JAebXRException {
+		throw new JAebXRException("Not yet implemented!");
 	}
 	
 	// TODO
-	public Collection<RegistryObjectType> getRegistryObjectTypes(Collection<String> objectKeys, String objectType) {
-		return null;
+	public Collection<RegistryObjectType> getRegistryObjectTypes(Collection<String> objectKeys, String objectType) throws JAebXRException {
+		throw new JAebXRException("Not yet implemented!");
 	}
 	
 	/*
