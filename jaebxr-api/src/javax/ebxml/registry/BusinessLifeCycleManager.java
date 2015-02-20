@@ -23,8 +23,10 @@ public class BusinessLifeCycleManager extends LifeCycleManager implements javax.
 	
 	public BusinessLifeCycleManager(javax.xml.registry.RegistryService rs) throws JAXRException {
 		super();
-		this.blcm = rs.getBusinessLifeCycleManager();
-		this.setRegistryService(rs);
+		if (rs != null) {
+			this.blcm = rs.getBusinessLifeCycleManager();
+			this.setRegistryService(rs);
+		}
 		this.setLifeCycleManager(blcm);
 		this.setSOAPMessenger(ConfigurationFactory.getInstance().getSOAPMessenger());
 	}
@@ -81,7 +83,7 @@ public class BusinessLifeCycleManager extends LifeCycleManager implements javax.
 
     public RegistryResponseType saveAssociationType(AssociationType1 a) throws JAebXRException {
     	JAXBElement<AssociationType1> eb = createAssociation(a);
-    	return saveObject(eb);
+    	return saveObjectType(eb);
     }
     
 	@Override
@@ -92,7 +94,7 @@ public class BusinessLifeCycleManager extends LifeCycleManager implements javax.
 	
     public RegistryResponseType saveClassificationSchemeType(ClassificationSchemeType cs) throws JAebXRException {
     	JAXBElement<ClassificationSchemeType> eb = createClassificationScheme(cs);
-    	return saveObject(eb);
+    	return saveObjectType(eb);
     }
     
     
@@ -103,7 +105,7 @@ public class BusinessLifeCycleManager extends LifeCycleManager implements javax.
     
     public RegistryResponseType saveClassificationNodeType(ClassificationNodeType cn) throws JAebXRException {
     	JAXBElement<ClassificationNodeType> eb = createClassificationNodeType(cn);
-    	return saveObject(eb);
+    	return saveObjectType(eb);
     }
     
     public RegistryResponseType saveClassificationNodes(Collection<ClassificationNodeType> ccn) throws JAebXRException {
@@ -113,7 +115,7 @@ public class BusinessLifeCycleManager extends LifeCycleManager implements javax.
     		list.add(this.createClassificationNodeType((ClassificationNodeType) i.next()));
     	};
     	SubmitObjectsRequest sreq = createSubmitObjectsRequest(list);
-    	RegistryResponseType resp = saveObjects(sreq);
+    	RegistryResponseType resp = saveObjectTypes(sreq);
     	return resp;    	
     }
     
