@@ -143,6 +143,63 @@ public class BusinessQueryManager extends QueryManager implements javax.xml.regi
 		return res;
 	}
 
+	public ClassificationSchemeType findClassificationSchemeByPattern(String namePattern) throws JAebXRException {
+		StringFilterType f = queryFac.createStringFilterType();		
+		f.setComparator(SimpleFilterType.Comparator.LIKE);
+		f.setDomainAttribute("name");
+		f.setValue(namePattern);
+
+		ClassificationSchemeQueryType q = queryFac.createClassificationSchemeQueryType();
+		q.setPrimaryFilter(f);
+		JAXBElement<ClassificationSchemeQueryType> ebq = queryFac.createClassificationSchemeQuery(q);
+
+		AdhocQueryType aqt = dqm.createQuery(CanonicalConstants.CANONICAL_QUERY_LANGUAGE_LID_ebRSFilterQuery, ebq);
+		AdhocQueryResponse rr = (AdhocQueryResponse) dqm.executeQuery(aqt);
+
+		ClassificationSchemeType res = null;
+		
+		if (rr.getStatus().equals(CanonicalConstants.CANONICAL_RESPONSE_STATUS_TYPE_LID_Success)) {
+			Iterator<JAXBElement<? extends IdentifiableType>> i = rr.getRegistryObjectList().getIdentifiable().iterator();
+			if (i.hasNext()) {
+				res = (ClassificationSchemeType) i.next().getValue();
+			}
+			
+	        if (i.hasNext()) {
+	            throw new JAebXRException("ClassificationScheme multiple match");
+	        }
+		}
+		
+		return res;
+	}
+	
+	public Collection<ClassificationNodeType> findClassificationNodesByNamePattern(String namePattern) throws JAebXRException {
+		StringFilterType rf = queryFac.createStringFilterType();
+		rf.setComparator(SimpleFilterType.Comparator.LIKE);
+		rf.setDomainAttribute("code");
+		rf.setValue(namePattern);
+		
+		ClassificationNodeQueryType q = queryFac.createClassificationNodeQueryType();
+		q.setPrimaryFilter(rf);
+		JAXBElement<ClassificationNodeQueryType> ebq = queryFac.createClassificationNodeQuery(q);
+
+		AdhocQueryType aqt = dqm.createQuery(CanonicalConstants.CANONICAL_QUERY_LANGUAGE_LID_ebRSFilterQuery, ebq);
+		AdhocQueryResponse rr = (AdhocQueryResponse) dqm.executeQuery(aqt);
+
+		Collection<ClassificationNodeType> res = new ArrayList<ClassificationNodeType>();
+		
+		if (rr.getStatus().equals(CanonicalConstants.CANONICAL_RESPONSE_STATUS_TYPE_LID_Success)) {
+			Iterator<JAXBElement<? extends IdentifiableType>> i = rr.getRegistryObjectList().getIdentifiable().iterator();
+			while (i.hasNext()) {
+				res.add((ClassificationNodeType) i.next().getValue());
+			}
+		}
+
+		if (res.size() == 0)
+			res = null;
+
+		return res;
+	}
+	
 	public ClassificationNodeType findClassificationNodeByPath(String path) throws JAebXRException {
 		StringTokenizer st = new StringTokenizer(path, "/");		
 		String parent = st.nextToken();
