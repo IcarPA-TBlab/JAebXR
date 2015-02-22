@@ -521,6 +521,10 @@ public class LifeCycleManager extends CanonicalConstants implements javax.xml.re
     	return createLocalizedStringType(value, null, null);
     }
     
+    public LocalizedStringType createLocalizedStringType(String value, String lang) {
+    	return createLocalizedStringType(value, lang, null);
+    }
+    
     public LocalizedStringType createLocalizedStringType(String value, String lang, String charset) {
     	LocalizedStringType ls = rimFac.createLocalizedStringType();
     	ls.setValue(value);
