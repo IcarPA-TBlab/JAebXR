@@ -733,6 +733,11 @@ public class LifeCycleManager extends CanonicalConstants implements javax.xml.re
 		return lcm.createService(arg0);
 	}
 
+    public JAXBElement<ServiceType> createService(ServiceType s) {
+    	JAXBElement<ServiceType> eb = rimFac.createService(s);
+    	return eb;
+    }
+    
 	public ServiceType createServiceType(String name) {
 		return createServiceType(createInternationalStringType(name));
 	}
@@ -950,11 +955,16 @@ public class LifeCycleManager extends CanonicalConstants implements javax.xml.re
     	return saveObjectType(eb, m);
     }
     
+    public RegistryResponseType saveObjectType(ServiceType s) throws JAebXRException {
+    	JAXBElement<ServiceType> eb = createService(s);
+    	return saveObjectType(eb);
+    }
+
     public RegistryResponseType saveObjectType(RegistryPackageType cn) throws JAebXRException {
     	JAXBElement<RegistryPackageType> eb = createRegistryPackage(cn);
     	return saveObjectType(eb);
     }
-
+    
     public RegistryResponseType saveFederations(Collection<FederationType> f) throws JAebXRException {
     	Collection <JAXBElement<? extends IdentifiableType>> list = new ArrayList<JAXBElement<? extends IdentifiableType>>();
     	Iterator<FederationType> i = f.iterator();
