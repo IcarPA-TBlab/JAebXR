@@ -13,6 +13,7 @@ import javax.xml.registry.infomodel.Concept;
 import javax.xml.registry.infomodel.Key;
 
 import org.oasis.ebxml.registry.bindings.query.AdhocQueryResponse;
+import org.oasis.ebxml.registry.bindings.query.AssociationQueryType;
 import org.oasis.ebxml.registry.bindings.query.ClassificationNodeQueryType;
 import org.oasis.ebxml.registry.bindings.query.ClassificationSchemeQueryType;
 import org.oasis.ebxml.registry.bindings.query.CompoundFilterType;
@@ -20,6 +21,7 @@ import org.oasis.ebxml.registry.bindings.query.RegistryObjectQueryType;
 import org.oasis.ebxml.registry.bindings.query.SimpleFilterType;
 import org.oasis.ebxml.registry.bindings.query.StringFilterType;
 import org.oasis.ebxml.registry.bindings.rim.AdhocQueryType;
+import org.oasis.ebxml.registry.bindings.rim.AssociationType1;
 import org.oasis.ebxml.registry.bindings.rim.AuditableEventType;
 import org.oasis.ebxml.registry.bindings.rim.ClassificationNodeType;
 import org.oasis.ebxml.registry.bindings.rim.ClassificationSchemeType;
@@ -380,6 +382,34 @@ public class BusinessQueryManager extends QueryManager implements javax.xml.regi
 		}
 		
 		return res;
+	}
+	
+	public Collection<AssociationType1> getAssociations(RegistryObjectType ro) throws JAebXRException {
+		StringFilterType f = queryFac.createStringFilterType();		
+		f.setComparator(SimpleFilterType.Comparator.EQ);
+		f.setDomainAttribute("id");
+		f.setValue(ro.getId());
+		
+		AssociationQueryType aq = queryFac.createAssociationQueryType();
+		aq.setSourceObjectQuery(aq);
+		JAXBElement<AssociationQueryType> ebq = queryFac.createAssociationQuery(aq);
+		
+		AdhocQueryType aqt = dqm.createQuery(CanonicalConstants.CANONICAL_QUERY_LANGUAGE_LID_ebRSFilterQuery, ebq);
+		AdhocQueryResponse rr = (AdhocQueryResponse) dqm.executeQuery(aqt);
+
+		Collection<AssociationType1> res = new ArrayList<AssociationType1>();
+
+		if (rr.getStatus().equals(CanonicalConstants.CANONICAL_RESPONSE_STATUS_TYPE_LID_Success)) {
+			Iterator<JAXBElement<? extends IdentifiableType>> i = rr.getRegistryObjectList().getIdentifiable().iterator();
+			while (i.hasNext()) {				
+				res.add((AssociationType1) i.next().getValue());
+			}
+		}
+
+		if (res.isEmpty())
+			res = null;
+		
+		return null;
 	}
 	
 	public RegistryObjectType getRegistryObjectType(String id) throws JAebXRException {
