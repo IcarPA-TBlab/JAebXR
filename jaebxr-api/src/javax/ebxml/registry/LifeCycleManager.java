@@ -574,6 +574,11 @@ public class LifeCycleManager extends CanonicalConstants implements javax.xml.re
 		return lcm.createOrganization(arg0);
 	}
 
+    public JAXBElement<OrganizationType> createOrganization(OrganizationType o) {
+    	JAXBElement<OrganizationType> eb = rimFac.createOrganization(o);
+    	return eb;
+    }
+    
 	public OrganizationType createOrganizationType(String name) {
 		return createOrganizationType(createInternationalStringType(name));
 	}
@@ -955,8 +960,8 @@ public class LifeCycleManager extends CanonicalConstants implements javax.xml.re
     	return saveObjectType(eb, m);
     }
     
-    public RegistryResponseType saveObjectType(ServiceType s) throws JAebXRException {
-    	JAXBElement<ServiceType> eb = createService(s);
+    public RegistryResponseType saveObjectType(OrganizationType o) throws JAebXRException {
+    	JAXBElement<OrganizationType> eb = createOrganization(o);
     	return saveObjectType(eb);
     }
 
@@ -965,6 +970,11 @@ public class LifeCycleManager extends CanonicalConstants implements javax.xml.re
     	return saveObjectType(eb);
     }
     
+    public RegistryResponseType saveObjectType(ServiceType s) throws JAebXRException {
+    	JAXBElement<ServiceType> eb = createService(s);
+    	return saveObjectType(eb);
+    }
+
     public RegistryResponseType saveFederations(Collection<FederationType> f) throws JAebXRException {
     	Collection <JAXBElement<? extends IdentifiableType>> list = new ArrayList<JAXBElement<? extends IdentifiableType>>();
     	Iterator<FederationType> i = f.iterator();
