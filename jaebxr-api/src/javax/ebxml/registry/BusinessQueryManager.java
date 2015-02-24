@@ -387,11 +387,11 @@ public class BusinessQueryManager extends QueryManager implements javax.xml.regi
 	public Collection<AssociationType1> getAssociations(RegistryObjectType ro) throws JAebXRException {
 		StringFilterType f = queryFac.createStringFilterType();		
 		f.setComparator(SimpleFilterType.Comparator.EQ);
-		f.setDomainAttribute("id");
+		f.setDomainAttribute("sourceObject");
 		f.setValue(ro.getId());
 		
 		AssociationQueryType aq = queryFac.createAssociationQueryType();
-		aq.setSourceObjectQuery(aq);
+		aq.setPrimaryFilter(f);
 		JAXBElement<AssociationQueryType> ebq = queryFac.createAssociationQuery(aq);
 		
 		AdhocQueryType aqt = dqm.createQuery(CanonicalConstants.CANONICAL_QUERY_LANGUAGE_LID_ebRSFilterQuery, ebq);
