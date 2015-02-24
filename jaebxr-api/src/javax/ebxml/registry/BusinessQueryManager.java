@@ -30,6 +30,7 @@ import org.oasis.ebxml.registry.bindings.rim.RegistryObjectType;
 import org.oasis.ebxml.registry.bindings.rim.SlotType1;
 import org.oasis.ebxml.registry.bindings.rim.UserType;
 import org.oasis.ebxml.registry.bindings.rim.ValueListType;
+import org.oasis.ebxml.registry.bindings.rs.RegistryResponseType;
 
 public class BusinessQueryManager extends QueryManager implements javax.xml.registry.BusinessQueryManager {
 
@@ -131,7 +132,7 @@ public class BusinessQueryManager extends QueryManager implements javax.xml.regi
 
 		ClassificationSchemeType res = null;
 		
-		if (rr.getStatus().equals(CanonicalConstants.CANONICAL_RESPONSE_STATUS_TYPE_LID_Success)) {
+		if (isStatusSuccess(rr)) {
 			Iterator<JAXBElement<? extends IdentifiableType>> i = rr.getRegistryObjectList().getIdentifiable().iterator();
 			if (i.hasNext()) {
 				res = (ClassificationSchemeType) i.next().getValue();
@@ -160,7 +161,7 @@ public class BusinessQueryManager extends QueryManager implements javax.xml.regi
 
 		ClassificationSchemeType res = null;
 		
-		if (rr.getStatus().equals(CanonicalConstants.CANONICAL_RESPONSE_STATUS_TYPE_LID_Success)) {
+		if (isStatusSuccess(rr)) {
 			Iterator<JAXBElement<? extends IdentifiableType>> i = rr.getRegistryObjectList().getIdentifiable().iterator();
 			if (i.hasNext()) {
 				res = (ClassificationSchemeType) i.next().getValue();
@@ -189,7 +190,7 @@ public class BusinessQueryManager extends QueryManager implements javax.xml.regi
 
 		Collection<ClassificationNodeType> res = new ArrayList<ClassificationNodeType>();
 		
-		if (rr.getStatus().equals(CanonicalConstants.CANONICAL_RESPONSE_STATUS_TYPE_LID_Success)) {
+		if (isStatusSuccess(rr)) {
 			Iterator<JAXBElement<? extends IdentifiableType>> i = rr.getRegistryObjectList().getIdentifiable().iterator();
 			while (i.hasNext()) {
 				res.add((ClassificationNodeType) i.next().getValue());
@@ -231,7 +232,7 @@ public class BusinessQueryManager extends QueryManager implements javax.xml.regi
 		
 		ClassificationNodeType res = null;
 		
-		if (rr.getStatus().equals(CanonicalConstants.CANONICAL_RESPONSE_STATUS_TYPE_LID_Success)) {
+		if (isStatusSuccess(rr)) {
 			Iterator<JAXBElement<? extends IdentifiableType>> i = rr.getRegistryObjectList().getIdentifiable().iterator();
 			if (i.hasNext()) {
 				res = (ClassificationNodeType) i.next().getValue();
@@ -255,7 +256,7 @@ public class BusinessQueryManager extends QueryManager implements javax.xml.regi
 		AdhocQueryResponse rr = (AdhocQueryResponse) dqm.executeStoredQuery(params);		
 		Collection<RegistryObjectType> roList = new ArrayList<RegistryObjectType>();
 		
-		if (rr.getStatus().equals(CanonicalConstants.CANONICAL_RESPONSE_STATUS_TYPE_LID_Success)) {
+		if (isStatusSuccess(rr)) {
 			Iterator<JAXBElement<? extends IdentifiableType>> i = rr.getRegistryObjectList().getIdentifiable().iterator();			
 			while (i.hasNext()) {
 				roList.add((RegistryObjectType) i.next().getValue());
@@ -276,7 +277,7 @@ public class BusinessQueryManager extends QueryManager implements javax.xml.regi
         
         Collection<String> res = new ArrayList<String>();
         
-		if (rr.getStatus().equals(CanonicalConstants.CANONICAL_RESPONSE_STATUS_TYPE_LID_Success)) {
+		if (isStatusSuccess(rr)) {
 			Iterator<JAXBElement<? extends IdentifiableType>> i = rr.getRegistryObjectList().getIdentifiable().iterator();			
 			while (i.hasNext()) {
 				res.add((String) i.next().getValue().getId());
@@ -309,7 +310,7 @@ public class BusinessQueryManager extends QueryManager implements javax.xml.regi
 			
 		Collection<AuditableEventType> aeList = new ArrayList<AuditableEventType>();
 		
-		if (rr.getStatus().equals(CanonicalConstants.CANONICAL_RESPONSE_STATUS_TYPE_LID_Success)) {
+		if (isStatusSuccess(rr)) {
 			Iterator<JAXBElement<? extends IdentifiableType>> i = rr.getRegistryObjectList().getIdentifiable().iterator();			
 			while (i.hasNext()) {
 				aeList.add((AuditableEventType) i.next().getValue());
@@ -337,7 +338,7 @@ public class BusinessQueryManager extends QueryManager implements javax.xml.regi
 		
 		UserType res = null;
 		
-		if (rr.getStatus().equals(CanonicalConstants.CANONICAL_RESPONSE_STATUS_TYPE_LID_Success)) {
+		if (isStatusSuccess(rr)) {
 			Iterator<JAXBElement<? extends IdentifiableType>> i = rr.getRegistryObjectList().getIdentifiable().iterator();
 			if (i.hasNext()) {
 				res = (UserType) i.next().getValue();
@@ -374,7 +375,7 @@ public class BusinessQueryManager extends QueryManager implements javax.xml.regi
 		
 		Collection<ClassificationSchemeType> res = new ArrayList<ClassificationSchemeType>();
 		
-		if (rr.getStatus().equals(CanonicalConstants.CANONICAL_RESPONSE_STATUS_TYPE_LID_Success)) {
+		if (isStatusSuccess(rr)) {
 			Iterator<JAXBElement<? extends IdentifiableType>> i = rr.getRegistryObjectList().getIdentifiable().iterator();
 			while (i.hasNext()) {				
 				res.add((ClassificationSchemeType) i.next().getValue());
@@ -399,7 +400,7 @@ public class BusinessQueryManager extends QueryManager implements javax.xml.regi
 
 		Collection<AssociationType1> res = new ArrayList<AssociationType1>();
 
-		if (rr.getStatus().equals(CanonicalConstants.CANONICAL_RESPONSE_STATUS_TYPE_LID_Success)) {
+		if (isStatusSuccess(rr)) {
 			Iterator<JAXBElement<? extends IdentifiableType>> i = rr.getRegistryObjectList().getIdentifiable().iterator();
 			while (i.hasNext()) {				
 				res.add((AssociationType1) i.next().getValue());
@@ -427,7 +428,7 @@ public class BusinessQueryManager extends QueryManager implements javax.xml.regi
 
 		RegistryObjectType res = null;
 		
-		if (rr.getStatus().equals(CanonicalConstants.CANONICAL_RESPONSE_STATUS_TYPE_LID_Success)) {
+		if (isStatusSuccess(rr)) {
 			Iterator<JAXBElement<? extends IdentifiableType>> i = rr.getRegistryObjectList().getIdentifiable().iterator();
 			if (i.hasNext()) {
 				res = (RegistryObjectType) i.next().getValue();
@@ -468,4 +469,9 @@ public class BusinessQueryManager extends QueryManager implements javax.xml.regi
 	public Collection<RegistryObjectType> getRegistryObjectTypes(Collection<String> objectKeys, String objectType) throws JAebXRException {
 		throw new JAebXRException("Not yet implemented!");
 	}
+	
+
+    public boolean isStatusSuccess(RegistryResponseType rr) {
+    	return rr.getStatus().equals(CanonicalConstants.CANONICAL_RESPONSE_STATUS_TYPE_LID_Success);
+    }
 }
