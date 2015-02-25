@@ -138,6 +138,7 @@ public class LifeCycleManager extends CanonicalConstants implements javax.xml.re
     public AssociationType1 createAssociationType(String srcId, String desId, String name, String description, String type) {
     	AssociationType1 a = rimFac.createAssociationType1();
     	a.setId(this.createUUID());
+    	a.setLid(a.getId());
     	a.setSourceObject(srcId);
     	a.setTargetObject(desId);
     	if (name != null)
@@ -189,6 +190,7 @@ public class LifeCycleManager extends CanonicalConstants implements javax.xml.re
 	public ClassificationType createClassificationType(ClassificationSchemeType scheme, String name, String value) {
 		ClassificationType c = rimFac.createClassificationType();
 		c.setId(this.createUUID());
+		c.setLid(c.getId());
 		c.setClassificationScheme(scheme.getId());
 		
 		if (name != null)
@@ -206,6 +208,7 @@ public class LifeCycleManager extends CanonicalConstants implements javax.xml.re
 	public ClassificationType createClassificationType(ClassificationNodeType node, InternationalStringType name, String value) {
 		ClassificationType c = rimFac.createClassificationType();
 		c.setId(this.createUUID());
+		c.setLid(c.getId());
 		c.setClassificationNode(node.getId());
 		
 		if (name != null)
@@ -238,6 +241,7 @@ public class LifeCycleManager extends CanonicalConstants implements javax.xml.re
 	public ClassificationSchemeType createClassificationSchemeType(ClassificationNodeType cn) {
 		ClassificationSchemeType cs = rimFac.createClassificationSchemeType();
 		cs.setId(this.createUUID());
+		cs.setLid(cs.getId());
 		cs.setName(cn.getName());
 		cs.setDescription(cn.getDescription());
 		cs.getClassification().addAll(cn.getClassification());
@@ -254,6 +258,7 @@ public class LifeCycleManager extends CanonicalConstants implements javax.xml.re
 	public ClassificationSchemeType createClassificationSchemeType(InternationalStringType name, InternationalStringType description) {
 		ClassificationSchemeType cs = rimFac.createClassificationSchemeType();
 		cs.setId(this.createUUID());
+		cs.setLid(cs.getId());
 		cs.setName(name);
 		cs.setDescription(description);
 		return cs;
@@ -291,6 +296,7 @@ public class LifeCycleManager extends CanonicalConstants implements javax.xml.re
 	public ClassificationNodeType createClassificationNodeType(RegistryObjectType parent, InternationalStringType name, String value) {
 		ClassificationNodeType cn = rimFac.createClassificationNodeType();
 		cn.setId(this.createUUID());
+		cn.setLid(cn.getId());
 		cn.setParent(parent.getId());
 		cn.setName(name);
 		cn.setCode(value);
@@ -349,6 +355,7 @@ public class LifeCycleManager extends CanonicalConstants implements javax.xml.re
 			String value) {
 		ExternalIdentifierType ei = rimFac.createExternalIdentifierType();
 		ei.setId(this.createUUID());
+		ei.setLid(ei.getId());
 		ei.setIdentificationScheme(scheme.getId());
 		ei.setName(name);
 		ei.setValue(value);
@@ -374,6 +381,7 @@ public class LifeCycleManager extends CanonicalConstants implements javax.xml.re
 	public ExternalLinkType createExternalLinkType(String externalURI, InternationalStringType description) {
 		ExternalLinkType el = rimFac.createExternalLinkType();
 		el.setId(this.createUUID());
+		el.setLid(el.getId());
 		el.setExternalURI(externalURI);
 		el.setDescription(description);
 		return el;
@@ -407,6 +415,7 @@ public class LifeCycleManager extends CanonicalConstants implements javax.xml.re
 		
 		ExtrinsicObjectType eo = rimFac.createExtrinsicObjectType();
 		eo.setId(this.createUUID());
+		eo.setLid(eo.getId());
 		eo.setObjectType("urn:oasis:names:tc:ebxml-regrep:ObjectType:RegistryObject:ExtrinsicObject");
 		
 		if (name != null)
@@ -461,6 +470,7 @@ public class LifeCycleManager extends CanonicalConstants implements javax.xml.re
     public FederationType createFederationType(String name, String description) {
        	FederationType f = rimFac.createFederationType();
        	f.setId(this.createUUID());
+       	f.setLid(f.getId());
     	f.setName(createInternationalStringType(name));
     	if (description != null) f.setDescription(createInternationalStringType(description));
     	return f;
@@ -588,6 +598,7 @@ public class LifeCycleManager extends CanonicalConstants implements javax.xml.re
 	public OrganizationType createOrganizationType(InternationalStringType name) {
 		OrganizationType o = rimFac.createOrganizationType();
 		o.setId(this.createUUID());
+		o.setLid(o.getId());
 		o.setName(name);
 		return o;
 	}
@@ -625,6 +636,7 @@ public class LifeCycleManager extends CanonicalConstants implements javax.xml.re
 	public PersonType createPersonType() {
 		PersonType p = rimFac.createPersonType();
 		p.setId(this.createUUID());
+		p.setLid(p.getId());
 		p.setName(createInternationalStringType(""));
 		p.setPersonName(createPersonNameType(""));
 		return p;
@@ -690,6 +702,7 @@ public class LifeCycleManager extends CanonicalConstants implements javax.xml.re
     public RegistryObjectType createRegistryObjectType(InternationalStringType name, InternationalStringType desc) {
     	RegistryObjectType ro = rimFac.createRegistryObjectType();
     	ro.setId(this.createUUID());
+    	ro.setLid(ro.getId());
     	if (name != null)
     		ro.setName(name);
     	if (desc != null)
@@ -721,6 +734,7 @@ public class LifeCycleManager extends CanonicalConstants implements javax.xml.re
 	public RegistryPackageType createRegistryPackageType(InternationalStringType name) {
 		RegistryPackageType rp = rimFac.createRegistryPackageType();
 		rp.setId(this.createUUID());
+		rp.setLid(rp.getId());
 		rp.setName(name);
 		return rp;
 	}
@@ -737,6 +751,7 @@ public class LifeCycleManager extends CanonicalConstants implements javax.xml.re
     public RegistryType createRegistryType(String name, String description) {
     	RegistryType r = rimFac.createRegistryType();
     	r.setId(this.createUUID());
+    	r.setLid(r.getId());
     	r.setName(createInternationalStringType(name));
     	if (description != null)
     		r.setDescription(createInternationalStringType(description));
@@ -765,6 +780,7 @@ public class LifeCycleManager extends CanonicalConstants implements javax.xml.re
 	public ServiceType createServiceType(InternationalStringType name) {
 		ServiceType st = rimFac.createServiceType();
 		st.setId(this.createUUID());
+		st.setLid(st.getId());
 		st.setName(name);
 		return st;
 	}
@@ -1031,6 +1047,15 @@ public class LifeCycleManager extends CanonicalConstants implements javax.xml.re
 
     
     public RegistryResponseType updateObjectType(RegistryObjectType o) throws JAebXRException {
+    	o.setId(this.createUUID());
+    	
+    	if (o.getClassification() != null) {
+    		List<ClassificationType> c = o.getClassification();
+    		Iterator<ClassificationType> i = c.iterator();
+    		while (i.hasNext())
+    			(i.next()).setClassifiedObject(o.getId());
+    	}
+    	
     	JAXBElement<? extends IdentifiableType> eb = null;
     	
 		if (o instanceof AssociationType1)
@@ -1043,14 +1068,16 @@ public class LifeCycleManager extends CanonicalConstants implements javax.xml.re
 			eb = createFederation((FederationType) o);
 		else if (o instanceof OrganizationType)
 			eb = createOrganization((OrganizationType) o);
+		else if (o instanceof PersonType)
+			eb = createPerson((PersonType) o);
 		else if (o instanceof RegistryPackageType)
 			eb = createRegistryPackage((RegistryPackageType) o);
 		else
 			throw new JAebXRException("Object not yet supported: " + o.getClass().getName());
 		
-    	UpdateObjectsRequest sreq = createUpdateObjectsRequest(eb);
-    	RegistryResponseType resp = updateObjectTypes(sreq);
-    	return resp;    	
+    	//UpdateObjectsRequest sreq = createUpdateObjectsRequest(eb);
+    	//RegistryResponseType resp = updateObjectTypes(sreq);
+    	return saveObjectType(eb);
     }
     
     public RegistryResponseType updateObjectType(JAXBElement<? extends IdentifiableType> eb) throws JAebXRException {
@@ -1079,7 +1106,9 @@ public class LifeCycleManager extends CanonicalConstants implements javax.xml.re
     			eb = createFederation((FederationType) o);
     		else if (o instanceof OrganizationType)
     			eb = createOrganization((OrganizationType) o);
-    		else if (o instanceof RegistryPackageType)
+    		else if (o instanceof PersonType)
+    			eb = createPerson((PersonType) o);
+   		else if (o instanceof RegistryPackageType)
     			eb = createRegistryPackage((RegistryPackageType) o);
     		else
     			throw new JAebXRException("Object not yet supported: " + o.getClass().getName());
