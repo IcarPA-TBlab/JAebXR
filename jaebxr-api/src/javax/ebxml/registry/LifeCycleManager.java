@@ -66,6 +66,7 @@ import org.oasis.ebxml.registry.bindings.rim.ObjectRefListType;
 import org.oasis.ebxml.registry.bindings.rim.ObjectRefType;
 import org.oasis.ebxml.registry.bindings.rim.OrganizationType;
 import org.oasis.ebxml.registry.bindings.rim.PersonNameType;
+import org.oasis.ebxml.registry.bindings.rim.PersonType;
 import org.oasis.ebxml.registry.bindings.rim.PostalAddressType;
 import org.oasis.ebxml.registry.bindings.rim.RegistryObjectListType;
 import org.oasis.ebxml.registry.bindings.rim.RegistryObjectType;
@@ -616,6 +617,19 @@ public class LifeCycleManager extends CanonicalConstants implements javax.xml.re
 		return pn;
 	}
 
+    public JAXBElement<PersonType> createPerson(PersonType p) {
+    	JAXBElement<PersonType> eb = rimFac.createPerson(p);
+    	return eb;
+    }
+    
+	public PersonType createPersonType() {
+		PersonType p = rimFac.createPersonType();
+		p.setId(this.createUUID());
+		p.setName(createInternationalStringType(""));
+		p.setPersonName(createPersonNameType(""));
+		return p;
+	}
+	
 	@Override
 	public PostalAddress createPostalAddress(String arg0, String arg1,
 			String arg2, String arg3, String arg4, String arg5, String arg6)
@@ -944,11 +958,6 @@ public class LifeCycleManager extends CanonicalConstants implements javax.xml.re
     	return saveObjectType(eb);
     }
     
-    public RegistryResponseType updateObjectType(ClassificationSchemeType cs) throws JAebXRException {
-    	JAXBElement<ClassificationSchemeType> eb = createClassificationScheme(cs);
-    	return updateObjectType(eb);
-    }
-    
     public RegistryResponseType saveObjectType(RegistryType cn) throws JAebXRException {
     	JAXBElement<RegistryType> eb = createRegistry(cn);
     	return saveObjectType(eb);
@@ -984,6 +993,11 @@ public class LifeCycleManager extends CanonicalConstants implements javax.xml.re
     	return saveObjectType(eb);
     }
 
+    public RegistryResponseType saveObjectType(PersonType o) throws JAebXRException {
+    	JAXBElement<PersonType> eb = createPerson(o);
+    	return saveObjectType(eb);
+    }
+    
     public RegistryResponseType saveObjectType(RegistryPackageType cn) throws JAebXRException {
     	JAXBElement<RegistryPackageType> eb = createRegistryPackage(cn);
     	return saveObjectType(eb);
@@ -1008,10 +1022,6 @@ public class LifeCycleManager extends CanonicalConstants implements javax.xml.re
     public RegistryResponseType saveObjectType(JAXBElement<? extends IdentifiableType> eb) throws JAebXRException {
     	return saveObjectType(eb, null);
     }
-
-    public RegistryResponseType updateObjectType(JAXBElement<? extends IdentifiableType> eb) throws JAebXRException {
-    	return updateObjectType(eb, null);
-    }
     
     public RegistryResponseType saveObjectType(JAXBElement<? extends IdentifiableType> eb, Map<String, DataHandler> attachments) throws JAebXRException {
     	SubmitObjectsRequest sreq = createSubmitObjectsRequest(eb);
@@ -1019,9 +1029,33 @@ public class LifeCycleManager extends CanonicalConstants implements javax.xml.re
     	return resp;
     }
 
-    public RegistryResponseType updateObjectType(JAXBElement<? extends IdentifiableType> eb, Map<String, DataHandler> attachments) throws JAebXRException {
+    
+    public RegistryResponseType updateObjectType(RegistryObjectType o) throws JAebXRException {
+    	JAXBElement<? extends IdentifiableType> eb = null;
+    	
+		if (o instanceof AssociationType1)
+			eb = createAssociation((AssociationType1) o);
+		else if (o instanceof ClassificationNodeType)
+			eb = createClassificationNode((ClassificationNodeType) o);
+		else if (o instanceof ExtrinsicObjectType)
+			eb = createExtrinsicObject((ExtrinsicObjectType) o);
+		else if (o instanceof FederationType)
+			eb = createFederation((FederationType) o);
+		else if (o instanceof OrganizationType)
+			eb = createOrganization((OrganizationType) o);
+		else if (o instanceof RegistryPackageType)
+			eb = createRegistryPackage((RegistryPackageType) o);
+		else
+			throw new JAebXRException("Object not yet supported: " + o.getClass().getName());
+		
     	UpdateObjectsRequest sreq = createUpdateObjectsRequest(eb);
-    	RegistryResponseType resp = updateObjectTypes(sreq, attachments);
+    	RegistryResponseType resp = updateObjectTypes(sreq);
+    	return resp;    	
+    }
+    
+    public RegistryResponseType updateObjectType(JAXBElement<? extends IdentifiableType> eb) throws JAebXRException {
+    	UpdateObjectsRequest sreq = createUpdateObjectsRequest(eb);
+    	RegistryResponseType resp = updateObjectTypes(sreq);
     	return resp;
     }
     
@@ -1037,7 +1071,9 @@ public class LifeCycleManager extends CanonicalConstants implements javax.xml.re
     			eb = createAssociation((AssociationType1) o);
     		else if (o instanceof ClassificationNodeType)
     			eb = createClassificationNode((ClassificationNodeType) o);
-    		else if (i instanceof ExtrinsicObjectType)
+    		else if (o instanceof ClassificationType)
+    			eb = createClassification((ClassificationType) o);
+    		else if (o instanceof ExtrinsicObjectType)
     			eb = createExtrinsicObject((ExtrinsicObjectType) o);
     		else if (o instanceof FederationType)
     			eb = createFederation((FederationType) o);
@@ -1076,11 +1112,7 @@ public class LifeCycleManager extends CanonicalConstants implements javax.xml.re
     */
     
     public RegistryResponseType updateObjectTypes(UpdateObjectsRequest req) throws JAebXRException {
-    	return updateObjectTypes(req, null);
-    }
-    
-    public RegistryResponseType updateObjectTypes(UpdateObjectsRequest req, Map<String, DataHandler> attachments) throws JAebXRException {
-    	return submitObjectTypes(req, attachments);
+    	return submitObjectTypes(req, null);
     }
     
     public RegistryResponseType saveObjectTypes(SubmitObjectsRequest req) throws JAebXRException {
