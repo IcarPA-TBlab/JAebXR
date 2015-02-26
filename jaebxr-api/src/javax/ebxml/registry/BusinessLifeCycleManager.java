@@ -10,11 +10,14 @@ import javax.xml.registry.InvalidRequestException;
 import javax.xml.registry.JAXRException;
 import javax.xml.registry.infomodel.Association;
 
+import org.oasis.ebxml.registry.bindings.lcm.SetStatusOnObjectsRequest;
 import org.oasis.ebxml.registry.bindings.lcm.SubmitObjectsRequest;
 import org.oasis.ebxml.registry.bindings.rim.AssociationType1;
 import org.oasis.ebxml.registry.bindings.rim.ClassificationNodeType;
 import org.oasis.ebxml.registry.bindings.rim.ClassificationSchemeType;
 import org.oasis.ebxml.registry.bindings.rim.IdentifiableType;
+import org.oasis.ebxml.registry.bindings.rim.ObjectRefListType;
+import org.oasis.ebxml.registry.bindings.rim.ObjectRefType;
 import org.oasis.ebxml.registry.bindings.rim.RegistryObjectType;
 import org.oasis.ebxml.registry.bindings.rs.RegistryResponseType;
 
@@ -142,10 +145,20 @@ public class BusinessLifeCycleManager extends LifeCycleManager implements javax.
 		blcm.unConfirmAssociation(arg0);
 	}
 
-	public RegistryResponseType setStatusOnObjects(RegistryObjectType ro, String statusTypeId) throws JAebXRException {
-		ro.setStatus(statusTypeId);
-		return updateObjectType(ro);
+	public RegistryResponseType setStatusOnObjectType(RegistryObjectType ro, String statusTypeId) throws JAebXRException {
+		ObjectRefType or = rimFac.createObjectRefType();
+		or.setId(ro.getId());
+		
+		Collection<ObjectRefType> orl = new ArrayList<ObjectRefType>();
+		orl.add(or);
+		
+		ObjectRefListType orlt = rimFac.createObjectRefListType();
+		orlt.getObjectRef().addAll(orl);
+		
+		SetStatusOnObjectsRequest req = lcmFac.createSetStatusOnObjectsRequest();		
+		req.setStatus(statusTypeId);
+		req.setObjectRefList(orlt);
+		
+		return submitObjectTypes(req);
 	}
-
-
 }
