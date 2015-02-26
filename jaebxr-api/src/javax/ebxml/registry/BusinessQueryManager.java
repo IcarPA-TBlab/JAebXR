@@ -11,7 +11,6 @@ import javax.xml.registry.JAXRException;
 import javax.xml.registry.infomodel.ClassificationScheme;
 import javax.xml.registry.infomodel.Concept;
 import javax.xml.registry.infomodel.Key;
-import javax.xml.registry.infomodel.RegistryObject;
 
 import org.oasis.ebxml.registry.bindings.query.AdhocQueryResponse;
 import org.oasis.ebxml.registry.bindings.query.AssociationQueryType;
