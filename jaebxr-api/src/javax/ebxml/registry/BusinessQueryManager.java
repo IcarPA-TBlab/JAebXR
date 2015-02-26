@@ -11,9 +11,11 @@ import javax.xml.registry.JAXRException;
 import javax.xml.registry.infomodel.ClassificationScheme;
 import javax.xml.registry.infomodel.Concept;
 import javax.xml.registry.infomodel.Key;
+import javax.xml.registry.infomodel.RegistryObject;
 
 import org.oasis.ebxml.registry.bindings.query.AdhocQueryResponse;
 import org.oasis.ebxml.registry.bindings.query.AssociationQueryType;
+import org.oasis.ebxml.registry.bindings.query.AuditableEventQueryType;
 import org.oasis.ebxml.registry.bindings.query.ClassificationNodeQueryType;
 import org.oasis.ebxml.registry.bindings.query.ClassificationSchemeQueryType;
 import org.oasis.ebxml.registry.bindings.query.CompoundFilterType;
@@ -448,6 +450,37 @@ public class BusinessQueryManager extends QueryManager implements javax.xml.regi
 			if (res.getObjectType().equals(objectType))
 				return res;
 		return null;
+	}
+	
+	public Collection<AuditableEventType> getAuditTrail(RegistryObjectType ro) throws JAebXRException {
+		StringFilterType f = queryFac.createStringFilterType();		
+		f.setComparator(SimpleFilterType.Comparator.EQ);
+		f.setDomainAttribute("id");
+		f.setValue(ro.getLid());
+		
+		RegistryObjectQueryType roq = queryFac.createRegistryObjectQueryType();
+		roq.setPrimaryFilter(f);
+		
+		AuditableEventQueryType aeq = queryFac.createAuditableEventQueryType();
+		aeq.getAffectedObjectQuery().add(roq);
+		JAXBElement<RegistryObjectQueryType> ebq = queryFac.createRegistryObjectQuery(roq);
+
+		AdhocQueryType aqt = dqm.createQuery(CanonicalConstants.CANONICAL_QUERY_LANGUAGE_LID_ebRSFilterQuery, ebq);
+		AdhocQueryResponse rr = (AdhocQueryResponse) dqm.executeQuery(aqt);
+
+		Collection<AuditableEventType> auditTrail = new ArrayList<AuditableEventType>();
+
+		if (isStatusSuccess(rr)) {
+			Iterator<JAXBElement<? extends IdentifiableType>> i = rr.getRegistryObjectList().getIdentifiable().iterator();
+			while (i.hasNext()) {				
+				auditTrail.add((AuditableEventType) i.next().getValue());
+			}
+		}
+
+		if (auditTrail.isEmpty())
+			auditTrail = null;
+
+		return auditTrail;
 	}
 	
 	// TODO
