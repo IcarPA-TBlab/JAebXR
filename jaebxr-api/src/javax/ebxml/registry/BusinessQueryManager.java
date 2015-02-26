@@ -462,7 +462,7 @@ public class BusinessQueryManager extends QueryManager implements javax.xml.regi
 		
 		AuditableEventQueryType aeq = queryFac.createAuditableEventQueryType();
 		aeq.getAffectedObjectQuery().add(roq);
-		JAXBElement<RegistryObjectQueryType> ebq = queryFac.createRegistryObjectQuery(roq);
+		JAXBElement<AuditableEventQueryType> ebq = queryFac.createAuditableEventQuery(aeq);
 
 		AdhocQueryType aqt = dqm.createQuery(CanonicalConstants.CANONICAL_QUERY_LANGUAGE_LID_ebRSFilterQuery, ebq);
 		AdhocQueryResponse rr = (AdhocQueryResponse) dqm.executeQuery(aqt);
@@ -476,8 +476,8 @@ public class BusinessQueryManager extends QueryManager implements javax.xml.regi
 			}
 		}
 
-		if (auditTrail.isEmpty())
-			auditTrail = null;
+		//if (auditTrail.isEmpty())
+		//	auditTrail = null;
 
 		return auditTrail;
 	}
