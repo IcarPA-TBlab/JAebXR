@@ -15,6 +15,7 @@ import org.oasis.ebxml.registry.bindings.rim.AssociationType1;
 import org.oasis.ebxml.registry.bindings.rim.ClassificationNodeType;
 import org.oasis.ebxml.registry.bindings.rim.ClassificationSchemeType;
 import org.oasis.ebxml.registry.bindings.rim.IdentifiableType;
+import org.oasis.ebxml.registry.bindings.rim.RegistryObjectType;
 import org.oasis.ebxml.registry.bindings.rs.RegistryResponseType;
 
 public class BusinessLifeCycleManager extends LifeCycleManager implements javax.xml.registry.BusinessLifeCycleManager {
@@ -139,6 +140,11 @@ public class BusinessLifeCycleManager extends LifeCycleManager implements javax.
 	public void unConfirmAssociation(Association arg0) throws JAXRException,
 			InvalidRequestException {
 		blcm.unConfirmAssociation(arg0);
+	}
+
+	public RegistryResponseType setStatusOnObjects(RegistryObjectType ro, String statusTypeId) throws JAebXRException {
+		ro.setStatus(statusTypeId);
+		return updateObjectType(ro);
 	}
 
 
