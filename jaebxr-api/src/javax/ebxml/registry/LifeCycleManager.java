@@ -1156,7 +1156,7 @@ public class LifeCycleManager extends CanonicalConstants implements javax.xml.re
     	return submitObjectTypes(req);
     }
     
-    private RegistryResponseType submitObjectTypes(RegistryRequestType req) throws JAebXRException {
+    protected RegistryResponseType submitObjectTypes(RegistryRequestType req) throws JAebXRException {
     	return submitObjectTypes(req, null);
     }
     
