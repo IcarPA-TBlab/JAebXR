@@ -452,6 +452,7 @@ public class BusinessQueryManager extends QueryManager implements javax.xml.regi
 	}
 	
 	public Collection<AuditableEventType> getAuditTrail(RegistryObjectType ro) throws JAebXRException {
+		/*
 		StringFilterType f = queryFac.createStringFilterType();		
 		f.setComparator(SimpleFilterType.Comparator.EQ);
 		f.setDomainAttribute("id");
@@ -465,6 +466,12 @@ public class BusinessQueryManager extends QueryManager implements javax.xml.regi
 		JAXBElement<AuditableEventQueryType> ebq = queryFac.createAuditableEventQuery(aeq);
 
 		AdhocQueryType aqt = dqm.createQuery(CanonicalConstants.CANONICAL_QUERY_LANGUAGE_LID_ebRSFilterQuery, ebq);
+		AdhocQueryType aqt = dqm.createQuery(CanonicalConstants.CANONICAL_QUERY_LANGUAGE_LID_ebRSFilterQuery, query);
+		*/
+		String query = "SELECT ae.* FROM AuditableEvent ae, AffectedObject ao, RegistryObject ro WHERE ro.lid='" + ro.getLid() +
+				"' AND ro.id = ao.id AND ao.eventId = ae.id ORDER BY ae.timeStamp_ ASC";
+
+		AdhocQueryType aqt = dqm.createQuery(CanonicalConstants.CANONICAL_QUERY_LANGUAGE_LID_SQL_92, query);
 		AdhocQueryResponse rr = (AdhocQueryResponse) dqm.executeQuery(aqt);
 
 		Collection<AuditableEventType> auditTrail = new ArrayList<AuditableEventType>();
@@ -475,9 +482,6 @@ public class BusinessQueryManager extends QueryManager implements javax.xml.regi
 				auditTrail.add((AuditableEventType) i.next().getValue());
 			}
 		}
-
-		//if (auditTrail.isEmpty())
-		//	auditTrail = null;
 
 		return auditTrail;
 	}
