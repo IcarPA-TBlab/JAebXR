@@ -91,9 +91,9 @@ public class LifeCycleManager extends CanonicalConstants implements javax.xml.re
 	
 	private static BindingUtility bu = BindingUtility.getInstance();
 	
-    private org.oasis.ebxml.registry.bindings.rim.ObjectFactory rimFac;
+    protected org.oasis.ebxml.registry.bindings.rim.ObjectFactory rimFac;
     //private org.oasis.ebxml.registry.bindings.rs.ObjectFactory rsFac;
-    private org.oasis.ebxml.registry.bindings.lcm.ObjectFactory lcmFac;
+    protected org.oasis.ebxml.registry.bindings.lcm.ObjectFactory lcmFac;
     //private org.oasis.ebxml.registry.bindings.query.ObjectFactory queryFac;
     //private org.oasis.ebxml.registry.bindings.cms.ObjectFactory cmsFac;
 
@@ -551,7 +551,7 @@ public class LifeCycleManager extends CanonicalConstants implements javax.xml.re
 		return lcm.createObject(arg0);
 	}
 
-	private List<ObjectRefType> createObjectRefList(Collection<String> keys) {
+	protected List<ObjectRefType> createObjectRefList(Collection<String> keys) {
 		ArrayList<ObjectRefType> orl = new ArrayList<ObjectRefType>();
 
 		// Used to prevent duplicate keys from being sent
