@@ -14,7 +14,6 @@ import javax.xml.registry.infomodel.Key;
 
 import org.oasis.ebxml.registry.bindings.query.AdhocQueryResponse;
 import org.oasis.ebxml.registry.bindings.query.AssociationQueryType;
-import org.oasis.ebxml.registry.bindings.query.AuditableEventQueryType;
 import org.oasis.ebxml.registry.bindings.query.ClassificationNodeQueryType;
 import org.oasis.ebxml.registry.bindings.query.ClassificationSchemeQueryType;
 import org.oasis.ebxml.registry.bindings.query.CompoundFilterType;
