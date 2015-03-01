@@ -92,14 +92,14 @@ public class LifeCycleManager extends CanonicalConstants implements javax.xml.re
 	private static BindingUtility bu = BindingUtility.getInstance();
 	
     protected org.oasis.ebxml.registry.bindings.rim.ObjectFactory rimFac;
-    //private org.oasis.ebxml.registry.bindings.rs.ObjectFactory rsFac;
+    private org.oasis.ebxml.registry.bindings.rs.ObjectFactory rsFac;
     protected org.oasis.ebxml.registry.bindings.lcm.ObjectFactory lcmFac;
     //private org.oasis.ebxml.registry.bindings.query.ObjectFactory queryFac;
     //private org.oasis.ebxml.registry.bindings.cms.ObjectFactory cmsFac;
 
 	public LifeCycleManager() {
         rimFac = new org.oasis.ebxml.registry.bindings.rim.ObjectFactory();
-        //rsFac = new org.oasis.ebxml.registry.bindings.rs.ObjectFactory();
+        rsFac = new org.oasis.ebxml.registry.bindings.rs.ObjectFactory();
         lcmFac = new org.oasis.ebxml.registry.bindings.lcm.ObjectFactory();
         //queryFac = new org.oasis.ebxml.registry.bindings.query.ObjectFactory();
         //cmsFac = new org.oasis.ebxml.registry.bindings.cms.ObjectFactory();		
@@ -1087,6 +1087,9 @@ public class LifeCycleManager extends CanonicalConstants implements javax.xml.re
     }
     
     public RegistryResponseType saveObjectTypes(Collection<? extends IdentifiableType> c) throws JAebXRException {
+    	if (c == null)
+    		return handleNullParam();
+    	
     	Collection <JAXBElement<? extends IdentifiableType>> list = new ArrayList<JAXBElement<? extends IdentifiableType>>();
     	
     	Iterator<? extends IdentifiableType> i = c.iterator();
@@ -1127,18 +1130,13 @@ public class LifeCycleManager extends CanonicalConstants implements javax.xml.re
     }
 
     public RegistryResponseType deleteObjectTypes(Collection<String> c) throws JAebXRException {
+    	if (c == null)
+    		return handleNullParam();
+    	
     	RemoveObjectsRequest sreq = createRemoveObjectsRequest(c);
     	RegistryResponseType resp = deleteObjectTypes(sreq);
     	return resp;    	
     }
-    
-    /*
-    public RegistryResponseType saveObject(Collection <JAXBElement<? extends IdentifiableType>> ebl) throws RegistryException {
-    	SubmitObjectsRequest sreq = createSubmitObjectsRequest(ebl);
-    	RegistryResponseType resp = saveObjects(sreq);
-    	return resp;
-    }
-    */
     
     public RegistryResponseType updateObjectTypes(UpdateObjectsRequest req) throws JAebXRException {
     	return submitObjectTypes(req, null);
@@ -1184,4 +1182,10 @@ public class LifeCycleManager extends CanonicalConstants implements javax.xml.re
             throw new JAebXRException(e);
         }
     }
+    
+    protected RegistryResponseType handleNullParam() {
+		RegistryResponseType res = rsFac.createRegistryResponseType();
+		res.setStatus(CanonicalConstants.CANONICAL_RESPONSE_STATUS_TYPE_LID_Failure);
+		return res;
+	}
 }
