@@ -1183,6 +1183,20 @@ public class LifeCycleManager extends CanonicalConstants implements javax.xml.re
         }
     }
     
+    public RegistryResponseType deprecateObjectTypes(Collection<String> c) throws JAebXRException {
+    	if (c == null)
+    		return handleNullParam();
+    	
+    	throw new JAebXRException("Not yet implemented!");   	
+    }
+    
+    public RegistryResponseType unDeprecateObjectTypes(Collection<String> c) throws JAebXRException {
+    	if (c == null)
+    		return handleNullParam();
+    	
+    	throw new JAebXRException("Not yet implemented!");   	
+    }
+    
     protected RegistryResponseType handleNullParam() {
 		RegistryResponseType res = rsFac.createRegistryResponseType();
 		res.setStatus(CanonicalConstants.CANONICAL_RESPONSE_STATUS_TYPE_LID_Failure);
