@@ -791,7 +791,10 @@ public class LifeCycleManager extends CanonicalConstants implements javax.xml.re
 	}
 
 	public ServiceBindingType createServiceBindingType() {
-		return rimFac.createServiceBindingType();
+		ServiceBindingType sb = rimFac.createServiceBindingType();
+		sb.setId(this.createUUID());
+		sb.setLid(sb.getId());
+		return sb;
 	}
 	
 	@Override
@@ -967,6 +970,11 @@ public class LifeCycleManager extends CanonicalConstants implements javax.xml.re
         HashMap<String, String> slotMap = new HashMap<String, String>();
         slotMap.put("urn:javax:xml:registry:connection:createHttpSession", "true");
         bu.addSlotsToRequest(req, slotMap);
+    }
+
+    public RegistryResponseType saveObjectType(AssociationType1 a) throws JAebXRException {
+    	JAXBElement<AssociationType1> eb = createAssociation(a);
+    	return saveObjectType(eb);
     }
 
     public RegistryResponseType saveObjectType(ClassificationSchemeType cs) throws JAebXRException {
@@ -1183,6 +1191,7 @@ public class LifeCycleManager extends CanonicalConstants implements javax.xml.re
         }
     }
     
+    // TODO
     public RegistryResponseType deprecateObjectTypes(Collection<String> c) throws JAebXRException {
     	if (c == null)
     		return handleNullParam();
@@ -1190,6 +1199,7 @@ public class LifeCycleManager extends CanonicalConstants implements javax.xml.re
     	throw new JAebXRException("Not yet implemented!");   	
     }
     
+    // TODO
     public RegistryResponseType unDeprecateObjectTypes(Collection<String> c) throws JAebXRException {
     	if (c == null)
     		return handleNullParam();
