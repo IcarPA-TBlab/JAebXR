@@ -980,6 +980,11 @@ public class LifeCycleManager extends CanonicalConstants implements javax.xml.re
     	return saveObjectType(eb);
     }
 
+    public RegistryResponseType saveObjectType(ClassificationNodeType cs) throws JAebXRException {
+    	JAXBElement<ClassificationNodeType> eb = createClassificationNode(cs);
+    	return saveObjectType(eb);
+    }
+    
     public RegistryResponseType saveObjectType(ClassificationSchemeType cs) throws JAebXRException {
     	JAXBElement<ClassificationSchemeType> eb = createClassificationScheme(cs);
     	return saveObjectType(eb);
