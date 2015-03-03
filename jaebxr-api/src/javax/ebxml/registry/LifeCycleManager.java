@@ -840,7 +840,10 @@ public class LifeCycleManager extends CanonicalConstants implements javax.xml.re
 	}
 
 	public SpecificationLinkType createSpecificationLinkType() {
-		return rimFac.createSpecificationLinkType();
+		SpecificationLinkType sl = rimFac.createSpecificationLinkType();
+		sl.setId(this.createUUID());
+		sl.setLid(sl.getId());
+		return sl;
 	}
 	
 	@Override
