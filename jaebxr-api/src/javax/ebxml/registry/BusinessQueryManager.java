@@ -27,6 +27,7 @@ import org.oasis.ebxml.registry.bindings.rim.ClassificationNodeType;
 import org.oasis.ebxml.registry.bindings.rim.ClassificationSchemeType;
 import org.oasis.ebxml.registry.bindings.rim.IdentifiableType;
 import org.oasis.ebxml.registry.bindings.rim.RegistryObjectType;
+import org.oasis.ebxml.registry.bindings.rim.ServiceType;
 import org.oasis.ebxml.registry.bindings.rim.SlotType1;
 import org.oasis.ebxml.registry.bindings.rim.UserType;
 import org.oasis.ebxml.registry.bindings.rim.ValueListType;
@@ -285,6 +286,24 @@ public class BusinessQueryManager extends QueryManager implements javax.xml.regi
 		}
        
 		return res;
+	}
+	
+	public Collection<ServiceType> findServicesByClassificationNode(String id) throws JAebXRException {
+        String sqlQuery = "SELECT s.* FROM Service s WHERE id IN (SELECT service FROM ServiceBinding WHERE id IN (SELECT servicebinding FROM SpecificationLink WHERE specificationobject = '" + id + "'))";
+        
+        AdhocQueryType q = dqm.createQuery(CanonicalConstants.CANONICAL_QUERY_LANGUAGE_LID_SQL_92, sqlQuery);
+		AdhocQueryResponse rr = (AdhocQueryResponse) dqm.executeQuery(q);
+
+		Collection<ServiceType> sList = new ArrayList<ServiceType>();
+
+		if (isStatusSuccess(rr)) {
+			Iterator<JAXBElement<? extends IdentifiableType>> i = rr.getRegistryObjectList().getIdentifiable().iterator();			
+			while (i.hasNext()) {
+				sList.add((ServiceType)i.next().getValue());
+			}
+		}
+
+		return sList;
 	}
 	
 	public Collection<AuditableEventType> getAuditTrailForRegistryObject(String id) throws JAebXRException {
