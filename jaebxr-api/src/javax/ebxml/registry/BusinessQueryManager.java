@@ -271,6 +271,35 @@ public class BusinessQueryManager extends QueryManager implements javax.xml.regi
 		return roList;
 	}
 
+	public Collection<AssociationType1> findCallerAssociations(String id) throws JAebXRException {
+        String sqlQuery =
+                "SELECT DISTINCT a.* FROM Association a, AuditableEvent e, AffectedObject o, Slot s1, Slot s2 WHERE " +
+                "e.user_ = $currentUser AND ( e.eventType = '" +
+                CanonicalConstants.CANONICAL_EVENT_TYPE_ID_Created +
+                "' OR e.eventType = '" +
+                CanonicalConstants.CANONICAL_EVENT_TYPE_ID_Versioned +
+                "' OR e.eventType = '" +
+                CanonicalConstants.CANONICAL_EVENT_TYPE_ID_Relocated +
+                "') AND o.eventId = e.id AND (o.id = a.sourceObject OR o.id = a.targetObject)";
+        
+        if (id != null)
+                sqlQuery += " AND a.associationType = '" + id + "'";
+        
+        AdhocQueryType q = dqm.createQuery(CanonicalConstants.CANONICAL_QUERY_LANGUAGE_LID_SQL_92, sqlQuery);
+        AdhocQueryResponse rr = (AdhocQueryResponse) dqm.executeQuery(q);
+        
+        Collection<AssociationType1> res = new ArrayList<AssociationType1>();
+        
+		if (isStatusSuccess(rr)) {
+			Iterator<JAXBElement<? extends IdentifiableType>> i = rr.getRegistryObjectList().getIdentifiable().iterator();			
+			while (i.hasNext()) {
+				res.add((AssociationType1) i.next().getValue());
+			}
+		}
+       
+		return res;
+	}
+	
 	public Collection<String> findRegistryObjectsByNamePattern(String namePattern) throws JAebXRException {
         String sqlQuery = "SELECT ro.* FROM RegistryObject ro, Name_ nm WHERE nm.value LIKE '" + namePattern + "' AND ro.id = nm.parent";
         
