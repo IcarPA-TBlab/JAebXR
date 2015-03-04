@@ -297,7 +297,8 @@ public class LifeCycleManager extends CanonicalConstants implements javax.xml.re
 		ClassificationNodeType cn = rimFac.createClassificationNodeType();
 		cn.setId(this.createUUID());
 		cn.setLid(cn.getId());
-		cn.setParent(parent.getId());
+		if (parent != null)
+			cn.setParent(parent.getId());
 		cn.setName(name);
 		cn.setCode(value);
 		cn.setDescription(name);
