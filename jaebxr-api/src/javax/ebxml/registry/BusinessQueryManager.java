@@ -336,6 +336,45 @@ public class BusinessQueryManager extends QueryManager implements javax.xml.regi
 		return sList;
 	}
 
+	public Collection<ServiceType> findServices() throws JAebXRException {
+        String sqlQuery = "SELECT s.* FROM Service s";
+        
+        AdhocQueryType q = dqm.createQuery(CanonicalConstants.CANONICAL_QUERY_LANGUAGE_LID_SQL_92, sqlQuery);
+		AdhocQueryResponse rr = (AdhocQueryResponse) dqm.executeQuery(q);
+
+		Collection<ServiceType> sList = new ArrayList<ServiceType>();
+
+		if (isStatusSuccess(rr)) {
+			Iterator<JAXBElement<? extends IdentifiableType>> i = rr.getRegistryObjectList().getIdentifiable().iterator();			
+			while (i.hasNext()) {
+				sList.add((ServiceType)i.next().getValue());
+			}
+		}
+
+		return sList;		
+	}
+	
+	public Collection<ServiceType> findServicesByOrganization(String orgId) throws JAebXRException {
+        String sqlQuery = "SELECT ss.* FROM Service ss WHERE id IN (SELECT s.id FROM Service s, Association a, Organization o WHERE " +
+                "s.id = a.targetobject and a.associationtype = '" +
+                CanonicalConstants.CANONICAL_ASSOCIATION_TYPE_ID_OffersService +
+                "' and a.sourceobject = '" + orgId + "')";
+        
+        AdhocQueryType q = dqm.createQuery(CanonicalConstants.CANONICAL_QUERY_LANGUAGE_LID_SQL_92, sqlQuery);
+		AdhocQueryResponse rr = (AdhocQueryResponse) dqm.executeQuery(q);
+
+		Collection<ServiceType> sList = new ArrayList<ServiceType>();
+
+		if (isStatusSuccess(rr)) {
+			Iterator<JAXBElement<? extends IdentifiableType>> i = rr.getRegistryObjectList().getIdentifiable().iterator();			
+			while (i.hasNext()) {
+				sList.add((ServiceType)i.next().getValue());
+			}
+		}
+
+		return sList;		
+	}
+	
 	public Collection<ServiceType> findServicesByClassificationNode(String id) throws JAebXRException {
         String sqlQuery = "SELECT s.* FROM Service s WHERE id IN (SELECT service FROM ServiceBinding WHERE id IN (SELECT servicebinding FROM SpecificationLink WHERE specificationobject = '" + id + "'))";
         
