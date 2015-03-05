@@ -18,6 +18,7 @@ import org.oasis.ebxml.registry.bindings.query.ClassificationNodeQueryType;
 import org.oasis.ebxml.registry.bindings.query.ClassificationSchemeQueryType;
 import org.oasis.ebxml.registry.bindings.query.CompoundFilterType;
 import org.oasis.ebxml.registry.bindings.query.RegistryObjectQueryType;
+import org.oasis.ebxml.registry.bindings.query.ServiceQueryType;
 import org.oasis.ebxml.registry.bindings.query.SimpleFilterType;
 import org.oasis.ebxml.registry.bindings.query.StringFilterType;
 import org.oasis.ebxml.registry.bindings.rim.AdhocQueryType;
@@ -391,6 +392,31 @@ public class BusinessQueryManager extends QueryManager implements javax.xml.regi
 		}
 
 		return sList;
+	}
+
+	public Collection<ServiceType> findServicesByNamePattern(String namePattern) throws JAebXRException {
+		StringFilterType rf = queryFac.createStringFilterType();
+		rf.setComparator(SimpleFilterType.Comparator.LIKE);
+		rf.setDomainAttribute("name");
+		rf.setValue(namePattern);
+		
+		ServiceQueryType q = queryFac.createServiceQueryType();
+		q.setPrimaryFilter(rf);
+		JAXBElement<ServiceQueryType> ebq = queryFac.createServiceQuery(q);
+
+		AdhocQueryType aqt = dqm.createQuery(CanonicalConstants.CANONICAL_QUERY_LANGUAGE_LID_ebRSFilterQuery, ebq);
+		AdhocQueryResponse rr = (AdhocQueryResponse) dqm.executeQuery(aqt);
+
+		Collection<ServiceType> res = new ArrayList<ServiceType>();
+		
+		if (isStatusSuccess(rr)) {
+			Iterator<JAXBElement<? extends IdentifiableType>> i = rr.getRegistryObjectList().getIdentifiable().iterator();
+			while (i.hasNext()) {
+				res.add((ServiceType) i.next().getValue());
+			}
+		}
+
+		return res;
 	}
 	
 	public Collection<AuditableEventType> getAuditTrailForRegistryObject(String id) throws JAebXRException {
