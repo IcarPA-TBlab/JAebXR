@@ -17,9 +17,9 @@ public class RegistryService implements javax.xml.registry.RegistryService {
 	public RegistryService(javax.xml.registry.RegistryService rs) throws JAXRException {
 		this.rs = rs;
 		if (rs != null) {
-			this.blcm = new BusinessLifeCycleManager(rs);
-			this.bqm = new BusinessQueryManager(rs);
-			this.dqm = new DeclarativeQueryManager(rs);
+			this.blcm = new BusinessLifeCycleManager(this);
+			this.bqm = new BusinessQueryManager(this);
+			this.dqm = new DeclarativeQueryManager(this);
 		}
 	}
 	
