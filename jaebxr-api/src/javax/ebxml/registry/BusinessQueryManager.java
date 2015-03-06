@@ -17,6 +17,7 @@ import org.oasis.ebxml.registry.bindings.query.AssociationQueryType;
 import org.oasis.ebxml.registry.bindings.query.ClassificationNodeQueryType;
 import org.oasis.ebxml.registry.bindings.query.ClassificationSchemeQueryType;
 import org.oasis.ebxml.registry.bindings.query.CompoundFilterType;
+import org.oasis.ebxml.registry.bindings.query.ExtrinsicObjectQueryType;
 import org.oasis.ebxml.registry.bindings.query.OrganizationQueryType;
 import org.oasis.ebxml.registry.bindings.query.RegistryObjectQueryType;
 import org.oasis.ebxml.registry.bindings.query.ServiceQueryType;
@@ -27,9 +28,11 @@ import org.oasis.ebxml.registry.bindings.rim.AssociationType1;
 import org.oasis.ebxml.registry.bindings.rim.AuditableEventType;
 import org.oasis.ebxml.registry.bindings.rim.ClassificationNodeType;
 import org.oasis.ebxml.registry.bindings.rim.ClassificationSchemeType;
+import org.oasis.ebxml.registry.bindings.rim.ExtrinsicObjectType;
 import org.oasis.ebxml.registry.bindings.rim.IdentifiableType;
 import org.oasis.ebxml.registry.bindings.rim.OrganizationType;
 import org.oasis.ebxml.registry.bindings.rim.RegistryObjectType;
+import org.oasis.ebxml.registry.bindings.rim.RegistryPackageType;
 import org.oasis.ebxml.registry.bindings.rim.ServiceBindingType;
 import org.oasis.ebxml.registry.bindings.rim.ServiceType;
 import org.oasis.ebxml.registry.bindings.rim.SlotType1;
@@ -512,6 +515,44 @@ public class BusinessQueryManager extends QueryManager implements javax.xml.regi
 		}
 		
 		return aeList;
+	}
+	
+	public Collection<ExtrinsicObjectType> getAssociatedExtrinsicObjects(RegistryPackageType rp) throws JAebXRException {
+		StringFilterType lf = queryFac.createStringFilterType();
+		lf.setComparator(SimpleFilterType.Comparator.EQ);
+		lf.setDomainAttribute("sourceObject");
+		lf.setValue(rp.getId());
+		
+		StringFilterType rf = queryFac.createStringFilterType();
+		rf.setComparator(SimpleFilterType.Comparator.EQ);
+		rf.setDomainAttribute("associationType");
+		rf.setValue(CanonicalConstants.CANONICAL_ASSOCIATION_TYPE_CODE_HasMember);
+
+		CompoundFilterType f = queryFac.createCompoundFilterType();
+		f.setLeftFilter(lf);
+		f.setRightFilter(rf);
+		
+		AssociationQueryType aq = queryFac.createAssociationQueryType();
+		aq.setPrimaryFilter(f);
+		
+		ExtrinsicObjectQueryType eoq = queryFac.createExtrinsicObjectQueryType();
+		eoq.getSourceAssociationQuery().add(aq);
+		
+		JAXBElement<ExtrinsicObjectQueryType> ebq = queryFac.createExtrinsicObjectQuery(eoq);
+		
+		AdhocQueryType aqt = dqm.createQuery(CanonicalConstants.CANONICAL_QUERY_LANGUAGE_LID_ebRSFilterQuery, ebq);
+		AdhocQueryResponse rr = (AdhocQueryResponse) dqm.executeQuery(aqt);
+
+		Collection<ExtrinsicObjectType> eoList = new ArrayList<ExtrinsicObjectType>();
+
+		if (isStatusSuccess(rr)) {
+			Iterator<JAXBElement<? extends IdentifiableType>> i = rr.getRegistryObjectList().getIdentifiable().iterator();
+			while (i.hasNext()) {				
+				eoList.add((ExtrinsicObjectType) i.next().getValue());
+			}
+		}
+
+		return eoList;
 	}
 	
 	public UserType getCallersUser() throws JAebXRException {
