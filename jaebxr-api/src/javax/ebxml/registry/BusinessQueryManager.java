@@ -484,6 +484,23 @@ public class BusinessQueryManager extends QueryManager implements javax.xml.regi
 		return res;
 	}
 	
+	public SlotType1 findSlot(RegistryObjectType ro, String slotName) {
+		SlotType1 slot = null;
+		
+		if (ro != null) {
+			Collection<SlotType1> list = ro.getSlot();
+			Iterator<SlotType1> i = list.iterator();
+			while (i.hasNext()) {
+				SlotType1 s = i.next();
+				if (s.getName().equals(slotName))
+					break;
+			}
+		}
+		
+		return slot;
+	}
+
+
 	public Collection<AuditableEventType> getAuditTrailForRegistryObject(String id) throws JAebXRException {
 		ValueListType vl1 = rimFac.createValueListType();
 		vl1.getValue().add(CanonicalConstants.CANONICAL_QUERY_GetAuditTrailForRegistryObject);
@@ -737,7 +754,6 @@ public class BusinessQueryManager extends QueryManager implements javax.xml.regi
 		throw new JAebXRException("Not yet implemented!");
 	}
 	
-
     public boolean isStatusSuccess(RegistryResponseType rr) {
     	return rr.getStatus().equals(CanonicalConstants.CANONICAL_RESPONSE_STATUS_TYPE_LID_Success);
     }
