@@ -17,6 +17,7 @@ import org.oasis.ebxml.registry.bindings.query.AssociationQueryType;
 import org.oasis.ebxml.registry.bindings.query.ClassificationNodeQueryType;
 import org.oasis.ebxml.registry.bindings.query.ClassificationSchemeQueryType;
 import org.oasis.ebxml.registry.bindings.query.CompoundFilterType;
+import org.oasis.ebxml.registry.bindings.query.OrganizationQueryType;
 import org.oasis.ebxml.registry.bindings.query.RegistryObjectQueryType;
 import org.oasis.ebxml.registry.bindings.query.ServiceQueryType;
 import org.oasis.ebxml.registry.bindings.query.SimpleFilterType;
@@ -27,6 +28,7 @@ import org.oasis.ebxml.registry.bindings.rim.AuditableEventType;
 import org.oasis.ebxml.registry.bindings.rim.ClassificationNodeType;
 import org.oasis.ebxml.registry.bindings.rim.ClassificationSchemeType;
 import org.oasis.ebxml.registry.bindings.rim.IdentifiableType;
+import org.oasis.ebxml.registry.bindings.rim.OrganizationType;
 import org.oasis.ebxml.registry.bindings.rim.RegistryObjectType;
 import org.oasis.ebxml.registry.bindings.rim.ServiceBindingType;
 import org.oasis.ebxml.registry.bindings.rim.ServiceType;
@@ -337,11 +339,31 @@ public class BusinessQueryManager extends QueryManager implements javax.xml.regi
 		return sList;
 	}
 
+	public Collection<OrganizationType> findOrganizations() throws JAebXRException {
+		OrganizationQueryType q = queryFac.createOrganizationQueryType();
+		JAXBElement<OrganizationQueryType> ebq = queryFac.createOrganizationQuery(q);
+
+		AdhocQueryType aqt = dqm.createQuery(CanonicalConstants.CANONICAL_QUERY_LANGUAGE_LID_ebRSFilterQuery, ebq);
+		AdhocQueryResponse rr = (AdhocQueryResponse) dqm.executeQuery(aqt);
+
+		Collection<OrganizationType> sList = new ArrayList<OrganizationType>();
+
+		if (isStatusSuccess(rr)) {
+			Iterator<JAXBElement<? extends IdentifiableType>> i = rr.getRegistryObjectList().getIdentifiable().iterator();			
+			while (i.hasNext()) {
+				sList.add((OrganizationType)i.next().getValue());
+			}
+		}
+
+		return sList;		
+	}
+	
 	public Collection<ServiceType> findServices() throws JAebXRException {
-        String sqlQuery = "SELECT s.* FROM Service s";
-        
-        AdhocQueryType q = dqm.createQuery(CanonicalConstants.CANONICAL_QUERY_LANGUAGE_LID_SQL_92, sqlQuery);
-		AdhocQueryResponse rr = (AdhocQueryResponse) dqm.executeQuery(q);
+		ServiceQueryType q = queryFac.createServiceQueryType();
+		JAXBElement<ServiceQueryType> ebq = queryFac.createServiceQuery(q);
+
+		AdhocQueryType aqt = dqm.createQuery(CanonicalConstants.CANONICAL_QUERY_LANGUAGE_LID_ebRSFilterQuery, ebq);
+		AdhocQueryResponse rr = (AdhocQueryResponse) dqm.executeQuery(aqt);
 
 		Collection<ServiceType> sList = new ArrayList<ServiceType>();
 
