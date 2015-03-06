@@ -374,6 +374,7 @@ public class LifeCycleManager extends CanonicalConstants implements javax.xml.re
 		return lcm.createExternalLink(arg0, arg1);
 	}
 
+	/*
 	public Collection<ExternalLinkType> addExternalLinkType(RegistryObjectType ro, Collection<ExternalLinkType> c) throws JAebXRException {
 		Collection<ExternalLinkType> res = new ArrayList<ExternalLinkType>();
 		
@@ -403,6 +404,7 @@ public class LifeCycleManager extends CanonicalConstants implements javax.xml.re
 		
 		return res;
 	}
+	*/
 	
 	public ExternalLinkType createExternalLinkType(String externalURI, String description) {
 		return createExternalLinkType(externalURI, createInternationalStringType(description));
