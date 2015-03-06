@@ -321,6 +321,25 @@ public class BusinessQueryManager extends QueryManager implements javax.xml.regi
 		return res;
 	}
 	
+	public RegistryObjectType findRegistryObjectByNameAndType(String roName, String roType) throws JAebXRException {
+		String sqlQuery = "select ro.* from registryobject ro, name_ nm where ro.id = nm.parent and nm.value = '" + roName + "'" +
+		        " and objecttype = '" + roType + "'";
+        
+        AdhocQueryType q = dqm.createQuery(CanonicalConstants.CANONICAL_QUERY_LANGUAGE_LID_SQL_92, sqlQuery);
+        AdhocQueryResponse rr = (AdhocQueryResponse) dqm.executeQuery(q);
+        
+        RegistryObjectType res = null;
+        
+		if (isStatusSuccess(rr)) {
+			Iterator<JAXBElement<? extends IdentifiableType>> i = rr.getRegistryObjectList().getIdentifiable().iterator();			
+			while (i.hasNext()) {
+				res = (RegistryObjectType) i.next().getValue();
+			}
+		}
+       
+		return res;
+	}
+	
 	public Collection<ServiceBindingType> findServiceBindingsByClassificationNode(String id) throws JAebXRException {
         String sqlQuery = "SELECT sb.* FROM ServiceBinding sb WHERE id IN (SELECT servicebinding FROM SpecificationLink WHERE specificationobject = '" + id + "')";
         
@@ -491,9 +510,6 @@ public class BusinessQueryManager extends QueryManager implements javax.xml.regi
 				aeList.add((AuditableEventType) i.next().getValue());
 			}
 		}
-		
-		if (aeList.size() == 0)
-			aeList = null;
 		
 		return aeList;
 	}
