@@ -28,6 +28,8 @@ import org.oasis.ebxml.registry.bindings.rim.AssociationType1;
 import org.oasis.ebxml.registry.bindings.rim.AuditableEventType;
 import org.oasis.ebxml.registry.bindings.rim.ClassificationNodeType;
 import org.oasis.ebxml.registry.bindings.rim.ClassificationSchemeType;
+import org.oasis.ebxml.registry.bindings.rim.ClassificationType;
+import org.oasis.ebxml.registry.bindings.rim.ExternalLinkType;
 import org.oasis.ebxml.registry.bindings.rim.ExtrinsicObjectType;
 import org.oasis.ebxml.registry.bindings.rim.IdentifiableType;
 import org.oasis.ebxml.registry.bindings.rim.OrganizationType;
@@ -734,6 +736,26 @@ public class BusinessQueryManager extends QueryManager implements javax.xml.regi
 		return auditTrail;
 	}
 	
+	public Collection<ExternalLinkType> getExternalLinks(RegistryObjectType ro) throws JAebXRException {
+		String query = "SELECT el.* FROM ExternalLink el, Association ass WHERE ass.targetObject = '" + ro.getId() + 
+				"' AND ass.associationType = '" + CanonicalConstants.CANONICAL_ASSOCIATION_TYPE_ID_ExternallyLinks +
+				"' AND ass.sourceObject = el.id ";
+
+		AdhocQueryType aqt = dqm.createQuery(CanonicalConstants.CANONICAL_QUERY_LANGUAGE_LID_SQL_92, query);
+		AdhocQueryResponse rr = (AdhocQueryResponse) dqm.executeQuery(aqt);
+
+		Collection<ExternalLinkType> ell = new ArrayList<ExternalLinkType>();
+		
+		if (isStatusSuccess(rr)) {
+			Iterator<JAXBElement<? extends IdentifiableType>> i = rr.getRegistryObjectList().getIdentifiable().iterator();
+			while (i.hasNext()) {				
+				ell.add((ExternalLinkType) i.next().getValue());
+			}
+		}
+
+		return ell;
+	}
+	
 	// TODO
 	public Collection<RegistryObjectType> getRegistryObjectTypes() throws JAebXRException {
 		throw new JAebXRException("Not yet implemented!");
@@ -752,6 +774,16 @@ public class BusinessQueryManager extends QueryManager implements javax.xml.regi
 	// TODO
 	public Collection<RegistryObjectType> getRegistryObjectTypes(Collection<String> objectKeys, String objectType) throws JAebXRException {
 		throw new JAebXRException("Not yet implemented!");
+	}
+	
+	public boolean isExternalClassification(ClassificationType c) {
+		boolean external = false;
+		
+		String cnode = c.getClassificationNode();
+		if (cnode == null)
+			external = true;
+		
+		return external;
 	}
 	
     public boolean isStatusSuccess(RegistryResponseType rr) {
