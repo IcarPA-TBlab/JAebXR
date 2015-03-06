@@ -25,7 +25,7 @@ public class BusinessLifeCycleManager extends LifeCycleManager implements javax.
 
 	private javax.xml.registry.BusinessLifeCycleManager blcm = null;
 	
-	public BusinessLifeCycleManager(javax.xml.registry.RegistryService rs) throws JAXRException {
+	public BusinessLifeCycleManager(RegistryService rs) throws JAXRException {
 		super();
 		if (rs != null) {
 			this.blcm = rs.getBusinessLifeCycleManager();

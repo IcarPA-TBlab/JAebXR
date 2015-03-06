@@ -22,7 +22,6 @@ import javax.xml.registry.BulkResponse;
 import javax.xml.registry.InvalidRequestException;
 import javax.xml.registry.JAXRException;
 import javax.xml.registry.RegistryException;
-import javax.xml.registry.RegistryService;
 import javax.xml.registry.UnsupportedCapabilityException;
 import javax.xml.registry.infomodel.Association;
 import javax.xml.registry.infomodel.Classification;
@@ -85,7 +84,7 @@ import org.oasis.ebxml.registry.bindings.rs.RegistryResponseType;
 public class LifeCycleManager extends CanonicalConstants implements javax.xml.registry.LifeCycleManager {
 
     private javax.xml.registry.LifeCycleManager lcm = null;
-	private javax.xml.registry.RegistryService rs = null;
+	private RegistryService rs = null;
 	
 	private SOAPMessenger msgr = null;
 	
@@ -113,7 +112,7 @@ public class LifeCycleManager extends CanonicalConstants implements javax.xml.re
     	this.lcm = lcm;
     }
     
-    protected void setRegistryService(javax.xml.registry.RegistryService rs) {
+    protected void setRegistryService(RegistryService rs) {
     	this.rs = rs;
     }
 
@@ -375,6 +374,36 @@ public class LifeCycleManager extends CanonicalConstants implements javax.xml.re
 		return lcm.createExternalLink(arg0, arg1);
 	}
 
+	public Collection<ExternalLinkType> addExternalLinkType(RegistryObjectType ro, Collection<ExternalLinkType> c) throws JAebXRException {
+		Collection<ExternalLinkType> res = new ArrayList<ExternalLinkType>();
+		
+		Iterator<ExternalLinkType> i = c.iterator();
+		while (i.hasNext()) {
+			ExternalLinkType el = (ExternalLinkType)i.next();
+			el = addExternalLinkType(ro, el);
+			res.add(el);
+		}
+		
+		return res;
+	}
+	
+	//TODO
+	public ExternalLinkType addExternalLinkType(RegistryObjectType ro, ExternalLinkType el) throws JAebXRException {
+		ExternalLinkType res = el;
+		boolean associationExists = false;
+		BusinessQueryManager bqm = null;
+		try {
+			bqm = rs.getBusinessQueryManager();
+		} catch (JAXRException e) {
+			throw new JAebXRException(e);
+		}
+		
+		ClassificationNodeType concept = bqm.findClassificationNodeByPath("/" + CanonicalConstants.CANONICAL_CLASSIFICATION_SCHEME_LID_AssociationType + "/" +
+                    CanonicalConstants.CANONICAL_ASSOCIATION_TYPE_CODE_ExternallyLinks);
+		
+		return res;
+	}
+	
 	public ExternalLinkType createExternalLinkType(String externalURI, String description) {
 		return createExternalLinkType(externalURI, createInternationalStringType(description));
 	}
