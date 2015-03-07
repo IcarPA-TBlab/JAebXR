@@ -17,7 +17,6 @@ import org.oasis.ebxml.registry.bindings.query.AssociationQueryType;
 import org.oasis.ebxml.registry.bindings.query.ClassificationNodeQueryType;
 import org.oasis.ebxml.registry.bindings.query.ClassificationSchemeQueryType;
 import org.oasis.ebxml.registry.bindings.query.CompoundFilterType;
-import org.oasis.ebxml.registry.bindings.query.ExtrinsicObjectQueryType;
 import org.oasis.ebxml.registry.bindings.query.OrganizationQueryType;
 import org.oasis.ebxml.registry.bindings.query.RegistryObjectQueryType;
 import org.oasis.ebxml.registry.bindings.query.ServiceQueryType;
@@ -536,30 +535,12 @@ public class BusinessQueryManager extends QueryManager implements javax.xml.regi
 		return aeList;
 	}
 	
+	// TODO
 	public Collection<ExtrinsicObjectType> getAssociatedExtrinsicObjects(RegistryPackageType rp) throws JAebXRException {
-		StringFilterType lf = queryFac.createStringFilterType();
-		lf.setComparator(SimpleFilterType.Comparator.EQ);
-		lf.setDomainAttribute("sourceObject");
-		lf.setValue(rp.getId());
-		
-		StringFilterType rf = queryFac.createStringFilterType();
-		rf.setComparator(SimpleFilterType.Comparator.EQ);
-		rf.setDomainAttribute("associationType");
-		rf.setValue(CanonicalConstants.CANONICAL_ASSOCIATION_TYPE_CODE_HasMember);
+		String query = "SELECT eo.* FROM ExtrinsicObject eo, Association a WHERE a.sourceObject = '" + rp.getId() + 
+						"' AND a.associationType = '" + CanonicalConstants.CANONICAL_ASSOCIATION_TYPE_CODE_HasMember + "'";
 
-		CompoundFilterType f = queryFac.createCompoundFilterType();
-		f.setLeftFilter(lf);
-		f.setRightFilter(rf);
-		
-		AssociationQueryType aq = queryFac.createAssociationQueryType();
-		aq.setPrimaryFilter(f);
-		
-		ExtrinsicObjectQueryType eoq = queryFac.createExtrinsicObjectQueryType();
-		eoq.getSourceAssociationQuery().add(aq);
-		
-		JAXBElement<ExtrinsicObjectQueryType> ebq = queryFac.createExtrinsicObjectQuery(eoq);
-		
-		AdhocQueryType aqt = dqm.createQuery(CanonicalConstants.CANONICAL_QUERY_LANGUAGE_LID_ebRSFilterQuery, ebq);
+		AdhocQueryType aqt = dqm.createQuery(CanonicalConstants.CANONICAL_QUERY_LANGUAGE_LID_SQL_92, query);
 		AdhocQueryResponse rr = (AdhocQueryResponse) dqm.executeQuery(aqt);
 
 		Collection<ExtrinsicObjectType> eoList = new ArrayList<ExtrinsicObjectType>();
@@ -699,22 +680,6 @@ public class BusinessQueryManager extends QueryManager implements javax.xml.regi
 	}
 	
 	public Collection<AuditableEventType> getAuditTrail(RegistryObjectType ro) throws JAebXRException {
-		/*
-		StringFilterType f = queryFac.createStringFilterType();		
-		f.setComparator(SimpleFilterType.Comparator.EQ);
-		f.setDomainAttribute("id");
-		f.setValue(ro.getLid());
-		
-		RegistryObjectQueryType roq = queryFac.createRegistryObjectQueryType();
-		roq.setPrimaryFilter(f);
-		
-		AuditableEventQueryType aeq = queryFac.createAuditableEventQueryType();
-		aeq.getAffectedObjectQuery().add(roq);
-		JAXBElement<AuditableEventQueryType> ebq = queryFac.createAuditableEventQuery(aeq);
-
-		AdhocQueryType aqt = dqm.createQuery(CanonicalConstants.CANONICAL_QUERY_LANGUAGE_LID_ebRSFilterQuery, ebq);
-		AdhocQueryType aqt = dqm.createQuery(CanonicalConstants.CANONICAL_QUERY_LANGUAGE_LID_ebRSFilterQuery, query);
-		*/
 		String query = "SELECT ae.* FROM AuditableEvent ae, AffectedObject ao, RegistryObject ro WHERE ro.lid='" + ro.getLid() +
 				"' AND ro.id = ao.id AND ao.eventId = ae.id ORDER BY ae.timeStamp_ ASC";
 
