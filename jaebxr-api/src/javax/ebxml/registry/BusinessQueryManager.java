@@ -145,6 +145,7 @@ public class BusinessQueryManager extends QueryManager implements javax.xml.regi
 			Iterator<JAXBElement<? extends IdentifiableType>> i = rr.getRegistryObjectList().getIdentifiable().iterator();
 			if (i.hasNext()) {
 				res = (ClassificationSchemeType) i.next().getValue();
+				res.getClassificationNode().addAll(getChildrens(res.getId()));
 			}
 			
 	        if (i.hasNext()) {
@@ -174,6 +175,7 @@ public class BusinessQueryManager extends QueryManager implements javax.xml.regi
 			Iterator<JAXBElement<? extends IdentifiableType>> i = rr.getRegistryObjectList().getIdentifiable().iterator();
 			if (i.hasNext()) {
 				res = (ClassificationSchemeType) i.next().getValue();
+				res.getClassificationNode().addAll(getChildrens(res.getId()));
 			}
 			
 	        if (i.hasNext()) {
@@ -202,7 +204,9 @@ public class BusinessQueryManager extends QueryManager implements javax.xml.regi
 		if (isStatusSuccess(rr)) {
 			Iterator<JAXBElement<? extends IdentifiableType>> i = rr.getRegistryObjectList().getIdentifiable().iterator();
 			while (i.hasNext()) {
-				res.add((ClassificationNodeType) i.next().getValue());
+				ClassificationNodeType node = (ClassificationNodeType) i.next().getValue();
+				node.getClassificationNode().addAll(getChildrens(node.getId()));
+				res.add(node);
 			}
 		}
 
@@ -245,6 +249,7 @@ public class BusinessQueryManager extends QueryManager implements javax.xml.regi
 			Iterator<JAXBElement<? extends IdentifiableType>> i = rr.getRegistryObjectList().getIdentifiable().iterator();
 			if (i.hasNext()) {
 				res = (ClassificationNodeType) i.next().getValue();
+				res.getClassificationNode().addAll(getChildrens(res.getId()));
 			}
 		}
 
