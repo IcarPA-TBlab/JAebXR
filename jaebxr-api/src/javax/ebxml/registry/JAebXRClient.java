@@ -27,9 +27,13 @@ public class JAebXRClient {
     private JAebXRClient() throws JAebXRException {
     	try {
     		ConfigurationFactory.getInstance();
-			lcm = new BusinessLifeCycleManager(null);
-			dqm = new DeclarativeQueryManager(null);
-			bqm = new BusinessQueryManager(dqm);
+    		service = new RegistryService(null);
+			lcm = service.getBusinessLifeCycleManager();
+			bqm = service.getBusinessQueryManager();
+			dqm = service.getDeclarativeQueryManager();
+//			lcm = new BusinessLifeCycleManager(null);
+//			dqm = new DeclarativeQueryManager(null);
+//			bqm = new BusinessQueryManager(dqm);
 		} catch (JAXRException e) {
 			throw new JAebXRException(e);
 		}
