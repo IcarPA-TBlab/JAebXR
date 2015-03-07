@@ -246,7 +246,7 @@ public class LifeCycleManager extends CanonicalConstants implements javax.xml.re
 		cs.getClassification().addAll(cn.getClassification());
 		cs.getExternalIdentifier().addAll(cn.getExternalIdentifier());
 		cs.setNodeType(CANONICAL_NODE_TYPE_ID_UniqueCode);
-		cs.setIsInternal(false);
+		cs.setIsInternal(true);
 		return cs;
 	}
 	
@@ -260,6 +260,7 @@ public class LifeCycleManager extends CanonicalConstants implements javax.xml.re
 		cs.setLid(cs.getId());
 		cs.setName(name);
 		cs.setDescription(description);
+		cs.setIsInternal(true);
 		return cs;
 	}
 
@@ -280,14 +281,6 @@ public class LifeCycleManager extends CanonicalConstants implements javax.xml.re
 		return lcm.createConcept(arg0, arg1, arg2);
 	}
 
-	public ClassificationNodeType createConceptType(RegistryObjectType parent, String name, String value) {
-		return createClassificationNodeType(parent, createInternationalStringType(name), value);
-	}
-
-	public ClassificationNodeType createConceptType(RegistryObjectType parent, InternationalStringType name, String value) {
-		return createClassificationNodeType(parent, name, value);
-	}
-	
 	public ClassificationNodeType createClassificationNodeType(RegistryObjectType parent, String name, String value) {
 		return createClassificationNodeType(parent, createInternationalStringType(name), value);
 	}
@@ -374,24 +367,11 @@ public class LifeCycleManager extends CanonicalConstants implements javax.xml.re
 		return lcm.createExternalLink(arg0, arg1);
 	}
 
-	/*
-	public Collection<ExternalLinkType> addExternalLinkType(RegistryObjectType ro, Collection<ExternalLinkType> c) throws JAebXRException {
-		Collection<ExternalLinkType> res = new ArrayList<ExternalLinkType>();
+	public RegistryResponseType addExternalLinkType(RegistryObjectType ro, ExternalLinkType el) throws JAebXRException {
+		RegistryResponseType res = rsFac.createRegistryResponseType();
+		res.setStatus(CANONICAL_RESPONSE_STATUS_TYPE_LID_Success);
 		
-		Iterator<ExternalLinkType> i = c.iterator();
-		while (i.hasNext()) {
-			ExternalLinkType el = (ExternalLinkType)i.next();
-			el = addExternalLinkType(ro, el);
-			res.add(el);
-		}
-		
-		return res;
-	}
-	
-	//TODO
-	public ExternalLinkType addExternalLinkType(RegistryObjectType ro, ExternalLinkType el) throws JAebXRException {
-		ExternalLinkType res = el;
-		boolean associationExists = false;
+		boolean extLinkExists = false;
 		BusinessQueryManager bqm = null;
 		try {
 			bqm = rs.getBusinessQueryManager();
@@ -399,12 +379,42 @@ public class LifeCycleManager extends CanonicalConstants implements javax.xml.re
 			throw new JAebXRException(e);
 		}
 		
-		ClassificationNodeType concept = bqm.findClassificationNodeByPath("/" + CanonicalConstants.CANONICAL_CLASSIFICATION_SCHEME_LID_AssociationType + "/" +
+		Collection<ExternalLinkType> els = bqm.getExternalLinks(ro);
+		Iterator<ExternalLinkType> ei = els.iterator();
+		while (ei.hasNext()) {
+			if (ei.next().getLid().equals(el.getLid())) {
+				extLinkExists = true;
+				break;
+			}
+		}
+		
+		if (!extLinkExists) {
+			boolean associationExists = false;
+			
+			ClassificationNodeType assocType = bqm.findClassificationNodeByPath("/" + CanonicalConstants.CANONICAL_CLASSIFICATION_SCHEME_LID_AssociationType + "/" +
                     CanonicalConstants.CANONICAL_ASSOCIATION_TYPE_CODE_ExternallyLinks);
+			
+			Collection<AssociationType1> al = bqm.getAssociations(el);
+			Iterator<AssociationType1> assIter = al.iterator();
+			while (assIter.hasNext()) {
+				AssociationType1 ass = assIter.next();
+				
+				if (ass.getSourceObject().equals(el.getLid()) &&
+						ass.getTargetObject().equals(ro.getLid()) &&
+						ass.getAssociationType().equals(assocType.getLid())) {
+					associationExists = true;
+					break;
+				}
+			}
+			
+			if (!associationExists) {
+				AssociationType1 ass = this.createAssociationType(el, ro, assocType);
+				res = saveObjectType(ass);
+			}
+		}
 		
 		return res;
 	}
-	*/
 	
 	public ExternalLinkType createExternalLinkType(String externalURI, String description) {
 		return createExternalLinkType(externalURI, createInternationalStringType(description));
@@ -1149,6 +1159,8 @@ public class LifeCycleManager extends CanonicalConstants implements javax.xml.re
     			eb = createAssociation((AssociationType1) o);
     		else if (o instanceof ClassificationNodeType)
     			eb = createClassificationNode((ClassificationNodeType) o);
+    		else if (o instanceof ClassificationSchemeType)
+    			eb = createClassificationScheme((ClassificationSchemeType) o);
     		else if (o instanceof ClassificationType)
     			eb = createClassification((ClassificationType) o);
     		else if (o instanceof ExtrinsicObjectType)
@@ -1159,7 +1171,7 @@ public class LifeCycleManager extends CanonicalConstants implements javax.xml.re
     			eb = createOrganization((OrganizationType) o);
     		else if (o instanceof PersonType)
     			eb = createPerson((PersonType) o);
-   		else if (o instanceof RegistryPackageType)
+    		else if (o instanceof RegistryPackageType)
     			eb = createRegistryPackage((RegistryPackageType) o);
     		else
     			throw new JAebXRException("Object not yet supported: " + o.getClass().getName());

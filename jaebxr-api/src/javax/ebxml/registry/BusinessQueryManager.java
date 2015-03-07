@@ -658,10 +658,7 @@ public class BusinessQueryManager extends QueryManager implements javax.xml.regi
 			}
 		}
 
-		if (res.isEmpty())
-			res = null;
-		
-		return null;
+		return res;
 	}
 	
 	public RegistryObjectType getRegistryObjectType(String id) throws JAebXRException {
