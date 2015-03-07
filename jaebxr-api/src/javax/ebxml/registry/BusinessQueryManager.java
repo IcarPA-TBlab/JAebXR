@@ -619,6 +619,33 @@ public class BusinessQueryManager extends QueryManager implements javax.xml.regi
 		return res;
 	}
 	
+	public Collection<ClassificationNodeType> getChildrens(String id) throws JAebXRException {
+		StringFilterType rf = queryFac.createStringFilterType();
+		rf.setComparator(SimpleFilterType.Comparator.EQ);
+		rf.setDomainAttribute("parent");
+		rf.setValue(id);
+		
+		ClassificationNodeQueryType q = queryFac.createClassificationNodeQueryType();
+		q.setPrimaryFilter(rf);
+		JAXBElement<ClassificationNodeQueryType> ebq = queryFac.createClassificationNodeQuery(q);
+
+		AdhocQueryType aqt = dqm.createQuery(CanonicalConstants.CANONICAL_QUERY_LANGUAGE_LID_ebRSFilterQuery, ebq);
+		AdhocQueryResponse rr = (AdhocQueryResponse) dqm.executeQuery(aqt);
+
+		Collection<ClassificationNodeType> res = new ArrayList<ClassificationNodeType>();
+
+		if (isStatusSuccess(rr)) {
+			Iterator<JAXBElement<? extends IdentifiableType>> i = rr.getRegistryObjectList().getIdentifiable().iterator();
+			while (i.hasNext()) {
+				ClassificationNodeType node = (ClassificationNodeType) i.next().getValue();
+				res.add(node);
+				res.addAll(getChildrens(node.getId()));
+			}
+		}
+
+		return res;
+	}
+	
 	public Collection<ClassificationNodeType> getDescendantClassificationNodes(ClassificationSchemeType cs) {
 		Collection<ClassificationNodeType> res = new ArrayList<ClassificationNodeType>();
 		
@@ -693,6 +720,17 @@ public class BusinessQueryManager extends QueryManager implements javax.xml.regi
 			Iterator<JAXBElement<? extends IdentifiableType>> i = rr.getRegistryObjectList().getIdentifiable().iterator();
 			if (i.hasNext()) {
 				res = (RegistryObjectType) i.next().getValue();
+				if (res instanceof ClassificationSchemeType) {
+					ClassificationSchemeType cs = (ClassificationSchemeType)res;
+					cs.getClassificationNode().addAll(getChildrens(res.getId()));
+					return cs;
+				}
+				if (res instanceof ClassificationNodeType) {
+					ClassificationNodeType cn = (ClassificationNodeType)res;
+					cn.getClassificationNode().addAll(getChildrens(res.getId()));
+					return cn;					
+				}
+					
 			}
 			
 	        if (i.hasNext()) {
