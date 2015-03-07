@@ -407,6 +407,8 @@ public class LifeCycleManager extends CanonicalConstants implements javax.xml.re
 				}
 			}
 			
+			res = saveObjectType(el);
+			
 			if (!associationExists) {
 				AssociationType1 ass = this.createAssociationType(el, ro, assocType);
 				res = saveObjectType(ass);
@@ -1032,6 +1034,11 @@ public class LifeCycleManager extends CanonicalConstants implements javax.xml.re
     	return saveObjectType(eb);
     }
     
+    public RegistryResponseType saveObjectType(ExternalLinkType cn) throws JAebXRException {
+    	JAXBElement<ExternalLinkType> eb = rimFac.createExternalLink(cn);
+    	return saveObjectType(eb);
+    }
+  
     public RegistryResponseType saveObjectType(RegistryType cn) throws JAebXRException {
     	JAXBElement<RegistryType> eb = createRegistry(cn);
     	return saveObjectType(eb);
