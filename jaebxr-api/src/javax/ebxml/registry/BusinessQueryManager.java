@@ -493,8 +493,10 @@ public class BusinessQueryManager extends QueryManager implements javax.xml.regi
 			Iterator<SlotType1> i = list.iterator();
 			while (i.hasNext()) {
 				SlotType1 s = i.next();
-				if (s.getName().equals(slotName))
+				if (s.getName().equals(slotName)) {
+					slot = s;
 					break;
+				}
 			}
 		}
 		
