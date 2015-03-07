@@ -619,6 +619,36 @@ public class BusinessQueryManager extends QueryManager implements javax.xml.regi
 		return res;
 	}
 	
+	public Collection<ClassificationNodeType> getDescendantClassificationNodes(ClassificationSchemeType cs) {
+		Collection<ClassificationNodeType> res = new ArrayList<ClassificationNodeType>();
+		
+		if (cs.getClassificationNode() != null) {
+			Iterator<ClassificationNodeType> i = cs.getClassificationNode().iterator();
+			while (i.hasNext()) {
+				ClassificationNodeType node = i.next();
+				res.add(node);
+				if (node.getClassificationNode() != null)
+					res.addAll(getDescendantClassificationNodes(node));
+			}			
+		}
+		
+		return res;
+	}
+	
+	public Collection<ClassificationNodeType> getDescendantClassificationNodes(ClassificationNodeType cn) {
+		Collection<ClassificationNodeType> res = new ArrayList<ClassificationNodeType>();
+		
+		Iterator<ClassificationNodeType> i = cn.getClassificationNode().iterator();
+		while (i.hasNext()) {
+			ClassificationNodeType node = i.next();
+			res.add(node);
+			if (node.getClassificationNode() != null)
+				res.addAll(getDescendantClassificationNodes(node));
+		}
+		
+		return res;
+	}
+	
 	public Collection<AssociationType1> getAssociations(RegistryObjectType ro) throws JAebXRException {
 		StringFilterType f = queryFac.createStringFilterType();		
 		f.setComparator(SimpleFilterType.Comparator.EQ);
