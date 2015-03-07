@@ -16,11 +16,11 @@ public class RegistryService implements javax.xml.registry.RegistryService {
 	
 	public RegistryService(javax.xml.registry.RegistryService rs) throws JAXRException {
 		this.rs = rs;
-		if (rs != null) {
+		//if (rs != null) {
 			this.blcm = new BusinessLifeCycleManager(this);
-			this.bqm = new BusinessQueryManager(this);
 			this.dqm = new DeclarativeQueryManager(this);
-		}
+			this.bqm = new BusinessQueryManager(this.dqm);
+		//}
 	}
 	
 	@Override
