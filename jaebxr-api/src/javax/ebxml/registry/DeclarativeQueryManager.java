@@ -47,6 +47,10 @@ public class DeclarativeQueryManager extends QueryManager implements javax.xml.r
 		return dqm.createQuery(arg0, arg1);
 	}
 
+	public AdhocQueryType createSQLQuery(String query) throws JAebXRException {
+		return createQuery(CanonicalConstants.CANONICAL_QUERY_LANGUAGE_LID_SQL_92, query);
+	}
+	
 	public AdhocQueryType createQuery(String queryType, Object queryString) throws JAebXRException {
 		if ((!queryType.equals(CanonicalConstants.CANONICAL_QUERY_LANGUAGE_LID_ebRSFilterQuery)) &&
 		    (!queryType.equals(CanonicalConstants.CANONICAL_QUERY_LANGUAGE_LID_SQL_92)))
