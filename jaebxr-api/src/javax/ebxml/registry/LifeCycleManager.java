@@ -1034,6 +1034,11 @@ public class LifeCycleManager extends CanonicalConstants implements javax.xml.re
     	return saveObjectType(eb);
     }
     
+    public RegistryResponseType saveObjectType(ClassificationType c) throws JAebXRException {
+    	JAXBElement<ClassificationType> eb = createClassification(c);
+    	return saveObjectType(eb);
+    }
+
     public RegistryResponseType saveObjectType(ExternalLinkType cn) throws JAebXRException {
     	JAXBElement<ExternalLinkType> eb = rimFac.createExternalLink(cn);
     	return saveObjectType(eb);
