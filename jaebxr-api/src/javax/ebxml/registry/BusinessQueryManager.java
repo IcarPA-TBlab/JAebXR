@@ -818,7 +818,21 @@ public class BusinessQueryManager extends QueryManager implements javax.xml.regi
 	
 	// TODO
 	public Collection<RegistryObjectType> getRegistryObjectTypes(String objectType) throws JAebXRException {
-		throw new JAebXRException("Not yet implemented!");
+		String query = "SELECT ro.* FROM RegistryObject ro WHERE objectType='" + objectType + "'";
+
+		AdhocQueryType aqt = dqm.createQuery(CanonicalConstants.CANONICAL_QUERY_LANGUAGE_LID_SQL_92, query);
+		AdhocQueryResponse rr = (AdhocQueryResponse) dqm.executeQuery(aqt);
+
+		Collection<RegistryObjectType> ell = new ArrayList<RegistryObjectType>();
+		
+		if (isStatusSuccess(rr)) {
+			Iterator<JAXBElement<? extends IdentifiableType>> i = rr.getRegistryObjectList().getIdentifiable().iterator();
+			while (i.hasNext()) {				
+				ell.add((RegistryObjectType) i.next().getValue());
+			}
+		}
+
+		return ell;
 	}
 	
 	// TODO
