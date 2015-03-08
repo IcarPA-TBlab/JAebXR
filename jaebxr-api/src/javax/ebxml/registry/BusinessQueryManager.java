@@ -348,7 +348,25 @@ public class BusinessQueryManager extends QueryManager implements javax.xml.regi
        
 		return res;
 	}
-	
+
+	public Collection<RegistryPackageType> findRegistryPackagesByClassification(String cId) throws JAebXRException {
+		String sqlQuery = "select p.* from registrypackage p, classification c where p.id = c.classifiedObject and c.id = '" + cId + "'";
+        
+        AdhocQueryType q = dqm.createQuery(CanonicalConstants.CANONICAL_QUERY_LANGUAGE_LID_SQL_92, sqlQuery);
+        AdhocQueryResponse rr = (AdhocQueryResponse) dqm.executeQuery(q);
+        
+        Collection<RegistryPackageType> res = new ArrayList<RegistryPackageType>();
+        
+		if (isStatusSuccess(rr)) {
+			Iterator<JAXBElement<? extends IdentifiableType>> i = rr.getRegistryObjectList().getIdentifiable().iterator();			
+			while (i.hasNext()) {
+				res.add((RegistryPackageType) i.next().getValue());
+			}
+		}
+       
+		return res;
+	}
+
 	public Collection<ServiceBindingType> findServiceBindingsByClassificationNode(String id) throws JAebXRException {
         String sqlQuery = "SELECT sb.* FROM ServiceBinding sb WHERE id IN (SELECT servicebinding FROM SpecificationLink WHERE specificationobject = '" + id + "')";
         
