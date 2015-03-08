@@ -19,6 +19,7 @@ import org.oasis.ebxml.registry.bindings.rim.IdentifiableType;
 import org.oasis.ebxml.registry.bindings.rim.ObjectRefListType;
 import org.oasis.ebxml.registry.bindings.rim.ObjectRefType;
 import org.oasis.ebxml.registry.bindings.rim.RegistryObjectType;
+import org.oasis.ebxml.registry.bindings.rim.ServiceType;
 import org.oasis.ebxml.registry.bindings.rs.RegistryResponseType;
 
 public class BusinessLifeCycleManager extends LifeCycleManager implements javax.xml.registry.BusinessLifeCycleManager {
@@ -134,6 +135,10 @@ public class BusinessLifeCycleManager extends LifeCycleManager implements javax.
 		return blcm.saveServiceBindings(arg0);
 	}
 
+    public RegistryResponseType saveServiceType(ServiceType s) throws JAebXRException {
+    	return saveObjectType(s);
+    }
+    
 	@Override
 	public BulkResponse saveServices(@SuppressWarnings("rawtypes") Collection arg0) throws JAXRException {
 		return blcm.saveServices(arg0);
