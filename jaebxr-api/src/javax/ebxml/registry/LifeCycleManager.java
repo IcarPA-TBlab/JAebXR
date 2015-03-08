@@ -829,6 +829,19 @@ public class LifeCycleManager extends CanonicalConstants implements javax.xml.re
 		return st;
 	}
 	
+	public RegistryResponseType addService(OrganizationType o, ServiceType s) throws JAebXRException {
+		ClassificationNodeType assocType = (JAebXRClient.getInstance().getBusinessQueryManager()).findClassificationNodeByPath("/" + CANONICAL_CLASSIFICATION_SCHEME_LID_AssociationType + "/" +
+                CANONICAL_ASSOCIATION_TYPE_CODE_OffersService);
+		
+		AssociationType1 ass = this.createAssociationType(o, s, assocType);
+		
+		Collection<RegistryObjectType> c = new ArrayList<RegistryObjectType>();
+		c.add(s);
+		c.add(ass);
+		
+		return saveObjectTypes(c);
+	}
+	
 	@Override
 	public ServiceBinding createServiceBinding() throws JAXRException {
 		return lcm.createServiceBinding();
@@ -1185,6 +1198,8 @@ public class LifeCycleManager extends CanonicalConstants implements javax.xml.re
     			eb = createPerson((PersonType) o);
     		else if (o instanceof RegistryPackageType)
     			eb = createRegistryPackage((RegistryPackageType) o);
+    		else if (o instanceof ServiceType)
+    			eb = createService((ServiceType) o);
     		else
     			throw new JAebXRException("Object not yet supported: " + o.getClass().getName());
     		    		
