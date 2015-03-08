@@ -845,6 +845,26 @@ public class BusinessQueryManager extends QueryManager implements javax.xml.regi
 		throw new JAebXRException("Not yet implemented!");
 	}
 	
+	public Collection<UserType> getUsers(OrganizationType o) throws JAebXRException {
+		String query = "SELECT u.* FROM User_ u, Association a WHERE a.sourceObject = u.id AND a.associationType = '" +
+                CanonicalConstants.CANONICAL_ASSOCIATION_TYPE_ID_AffiliatedWith + 
+                "' AND a.targetObject = '" + o.getId() + "'";
+		
+		AdhocQueryType aqt = dqm.createQuery(CanonicalConstants.CANONICAL_QUERY_LANGUAGE_LID_SQL_92, query);
+		AdhocQueryResponse rr = (AdhocQueryResponse) dqm.executeQuery(aqt);
+
+		Collection<UserType> res = new ArrayList<UserType>();
+		
+		if (isStatusSuccess(rr)) {
+			Iterator<JAXBElement<? extends IdentifiableType>> i = rr.getRegistryObjectList().getIdentifiable().iterator();
+			while (i.hasNext()) {				
+				res.add((UserType) i.next().getValue());
+			}
+		}
+
+		return res;
+	}
+	
 	public boolean isExternalClassification(ClassificationType c) {
 		boolean external = false;
 		
