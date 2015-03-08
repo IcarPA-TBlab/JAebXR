@@ -542,6 +542,10 @@ public class LifeCycleManager extends CanonicalConstants implements javax.xml.re
     	return eb;
     }
 
+    public InternationalStringType createInternationalStringType() {
+        return createInternationalStringType(null);
+    }
+
     public InternationalStringType createInternationalStringType(String str) {
     	InternationalStringType is = rimFac.createInternationalStringType();
     	if (str != null) {
@@ -918,7 +922,23 @@ public class LifeCycleManager extends CanonicalConstants implements javax.xml.re
 	}
 
 	public UserType createUserType() {
-		return rimFac.createUserType();
+		UserType u = rimFac.createUserType();
+		u.setId(this.createUUID());
+		u.setLid(u.getId());
+		return u;
+	}
+
+	public RegistryResponseType addUser(OrganizationType o, UserType u) throws JAebXRException {
+		ClassificationNodeType assocType = (JAebXRClient.getInstance().getBusinessQueryManager()).findClassificationNodeByPath("/" + CANONICAL_CLASSIFICATION_SCHEME_LID_AssociationType + "/" +
+				CANONICAL_ASSOCIATION_TYPE_CODE_AffiliatedWith);
+		
+		AssociationType1 ass = this.createAssociationType(u, o, assocType);
+		
+		Collection<RegistryObjectType> c = new ArrayList<RegistryObjectType>();
+		c.add(u);
+		c.add(ass);
+		
+		return saveObjectTypes(c);
 	}
 
     public RemoveObjectsRequest createRemoveObjectsRequest(String id) {
