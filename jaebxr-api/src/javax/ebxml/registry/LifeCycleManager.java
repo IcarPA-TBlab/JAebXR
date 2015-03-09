@@ -599,6 +599,37 @@ public class LifeCycleManager extends CanonicalConstants implements javax.xml.re
 		return lcm.createObject(arg0);
 	}
 
+	protected List<ObjectRefType> createObjectRefList(Collection<?> ids) {
+		ArrayList<ObjectRefType> orl = new ArrayList<ObjectRefType>();
+		String id;
+
+		// Used to prevent duplicate keys from being sent
+		HashSet<String> processedIds = new HashSet<String>();
+		processedIds.add(null);
+
+		if (ids != null) {
+			for (Iterator<?> it = ids.iterator(); it.hasNext();) {
+				Object o = it.next();
+				
+				if (o instanceof RegistryObjectType)
+					id = ((RegistryObjectType) o).getId();
+				else
+					id = (String) o;
+
+				if (!processedIds.contains(id)) {
+					processedIds.add(id);
+
+					ObjectRefType ebObjectRefType = rimFac.createObjectRefType();
+					ebObjectRefType.setId(id);
+					orl.add(ebObjectRefType);
+				}
+			}
+		}
+
+		return orl;
+	}
+
+	/*
 	protected List<ObjectRefType> createObjectRefList(Collection<String> keys) {
 		ArrayList<ObjectRefType> orl = new ArrayList<ObjectRefType>();
 
@@ -622,6 +653,7 @@ public class LifeCycleManager extends CanonicalConstants implements javax.xml.re
 
 		return orl;
 	}
+	*/
 	
 	@Override
 	public Organization createOrganization(String arg0) throws JAXRException {
@@ -942,15 +974,38 @@ public class LifeCycleManager extends CanonicalConstants implements javax.xml.re
 	}
 
     public RemoveObjectsRequest createRemoveObjectsRequest(String id) {
-    	Collection <String> ids = new ArrayList<String>();
+    	Collection <Object> ids = new ArrayList<Object>();
     	ids.add(id);
     	return createRemoveObjectsRequest(ids);
     }
     
-    public RemoveObjectsRequest createRemoveObjectsRequest(Collection<String> ids) {
+    public RemoveObjectsRequest createRemoveObjectsRequest(Collection<?> ids) {
     	return createRemoveObjectsRequest(ids, CANONICAL_DELETION_SCOPE_TYPE_ID_DeleteAll);
     }
     
+    public RemoveObjectsRequest createRemoveObjectsRequest(Collection<?> ids, String deletetionScope) {
+    	RemoveObjectsRequest req = lcmFac.createRemoveObjectsRequest();    	
+    	req.setDeletionScope(deletetionScope);
+    	
+    	ObjectRefListType orl = rimFac.createObjectRefListType();
+    	orl.getObjectRef().addAll(createObjectRefList(ids));
+    	
+    	req.setObjectRefList(orl);
+    	
+    	return req;
+    }
+
+    /*
+    public RemoveObjectsRequest createRemoveObjectsRequest(String id) {
+    	Collection <String> ids = new ArrayList<String>();
+    	ids.add(id);
+    	return createRemoveObjectsRequest(ids);
+    }
+
+    public RemoveObjectsRequest createRemoveObjectsRequest(Collection<String> ids) {
+    	return createRemoveObjectsRequest(ids, CANONICAL_DELETION_SCOPE_TYPE_ID_DeleteAll);
+    }
+
     public RemoveObjectsRequest createRemoveObjectsRequest(Collection<String> ids, String deletetionScope) {
     	RemoveObjectsRequest req = lcmFac.createRemoveObjectsRequest();    	
     	req.setDeletionScope(deletetionScope);
@@ -962,6 +1017,7 @@ public class LifeCycleManager extends CanonicalConstants implements javax.xml.re
     	
     	return req;
     }
+    */
     
     public SubmitObjectsRequest createSubmitObjectsRequest(JAXBElement<? extends IdentifiableType> eb) {
     	Collection<JAXBElement<? extends IdentifiableType>> ebl = new ArrayList<JAXBElement<? extends IdentifiableType>>();
@@ -1241,6 +1297,16 @@ public class LifeCycleManager extends CanonicalConstants implements javax.xml.re
     	return resp;    	
     }
 
+    public RegistryResponseType deleteObjectTypes(Collection<?> ass) throws JAebXRException {
+    	if (ass == null)
+    		return handleNullParam();
+    	
+    	RemoveObjectsRequest sreq = createRemoveObjectsRequest(ass);
+    	RegistryResponseType resp = deleteObjectTypes(sreq);
+    	return resp;    	
+    }
+    
+    /*
     public RegistryResponseType deleteObjectTypes(Collection<String> c) throws JAebXRException {
     	if (c == null)
     		return handleNullParam();
@@ -1249,7 +1315,8 @@ public class LifeCycleManager extends CanonicalConstants implements javax.xml.re
     	RegistryResponseType resp = deleteObjectTypes(sreq);
     	return resp;    	
     }
-    
+    */
+
     public RegistryResponseType updateObjectTypes(UpdateObjectsRequest req) throws JAebXRException {
     	return submitObjectTypes(req, null);
     }
