@@ -1148,7 +1148,6 @@ public class LifeCycleManager extends CanonicalConstants implements javax.xml.re
     	return resp;
     }
 
-    
     public RegistryResponseType updateObjectType(RegistryObjectType o) throws JAebXRException {
     	o.setId(this.createUUID());
     	
@@ -1165,6 +1164,10 @@ public class LifeCycleManager extends CanonicalConstants implements javax.xml.re
 			eb = createAssociation((AssociationType1) o);
 		else if (o instanceof ClassificationNodeType)
 			eb = createClassificationNode((ClassificationNodeType) o);
+		else if (o instanceof ClassificationSchemeType)
+			eb = createClassificationScheme((ClassificationSchemeType) o);
+		else if (o instanceof ClassificationType)
+			eb = createClassification((ClassificationType) o);
 		else if (o instanceof ExtrinsicObjectType)
 			eb = createExtrinsicObject((ExtrinsicObjectType) o);
 		else if (o instanceof FederationType)
@@ -1175,6 +1178,8 @@ public class LifeCycleManager extends CanonicalConstants implements javax.xml.re
 			eb = createPerson((PersonType) o);
 		else if (o instanceof RegistryPackageType)
 			eb = createRegistryPackage((RegistryPackageType) o);
+		else if (o instanceof ServiceType)
+			eb = createService((ServiceType) o);
 		else
 			throw new JAebXRException("Object not yet supported: " + o.getClass().getName());
 		
@@ -1311,4 +1316,61 @@ public class LifeCycleManager extends CanonicalConstants implements javax.xml.re
 		res.setStatus(CanonicalConstants.CANONICAL_RESPONSE_STATUS_TYPE_LID_Failure);
 		return res;
 	}
+
+	
+	public OrganizationType getProvidingOrganization(ServiceType s) throws JAebXRException {
+		OrganizationType org = null;
+		
+		SlotType1 providingOrgSlot = getSlot(s, "providingOrganization");
+        if (providingOrgSlot != null) {
+            List<String> providingOrgValues = providingOrgSlot.getValueList().getValue();
+            Iterator<String> providingOrgIter = providingOrgValues.iterator();
+            org = (OrganizationType) (JAebXRClient.getInstance().getBusinessQueryManager().getRegistryObjectType(providingOrgIter.next()));
+        }
+
+		return org;
+	}
+	
+	public ServiceType setProvidingOrganization(ServiceType s, OrganizationType o) {
+		SlotType1 providingOrgSlot = getSlot(s, "providingOrganization");
+		if (providingOrgSlot != null)
+			s.getSlot().remove(providingOrgSlot);
+		if (o != null) {
+			providingOrgSlot = this.createSlotType1("providingOrganization", o.getId(), null);
+			s.getSlot().add(providingOrgSlot);
+		}
+		return s;
+	}
+	
+    public SlotType1 getSlot(RegistryObjectType ro, String name) {
+    	if (ro.getSlot() != null) {
+        	Iterator<SlotType1> i = ro.getSlot().iterator();
+        	while (i.hasNext()) {
+            	SlotType1 s = i.next();
+            	if (s.getName().equals(name))
+            		return s;
+        	}
+    	}
+    	return null;
+    }
+    
+    public URL getUrl(UserType u) throws JAebXRException {
+        URL url = null;
+        SlotType1 urlSlot = getSlot(u, IMPL_SLOT_PERSON_URL);
+        if (urlSlot != null) {
+            String urlStr = (String)(urlSlot.getValueList().getValue().toArray())[0];
+            try {
+                url = new URL(urlStr);
+            } catch (MalformedURLException e) {
+                throw new JAebXRException(e);
+            }
+        }
+        return url;
+    }
+
+    public UserType setUrl(UserType u, URL url) {
+        SlotType1 urlSlot = createSlotType1(IMPL_SLOT_PERSON_URL, url.toString(), CANONICAL_DATA_TYPE_LID_String);
+        u.getSlot().add(urlSlot);
+        return u;
+    }
 }
