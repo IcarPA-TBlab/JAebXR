@@ -52,8 +52,8 @@ public class ConfigurationFactory {
             percorso += CONFIG_PATH;
             CONFIG_PATH = percorso;
         }
-        System.out.print("jaebxr config path: ");
-        System.out.println(CONFIG_PATH);
+        //System.out.print("jaebxr config path: ");
+        //System.out.println(CONFIG_PATH);
         loadProperties();
     }
 
