@@ -32,6 +32,7 @@ import org.oasis.ebxml.registry.bindings.rim.ExternalLinkType;
 import org.oasis.ebxml.registry.bindings.rim.ExtrinsicObjectType;
 import org.oasis.ebxml.registry.bindings.rim.IdentifiableType;
 import org.oasis.ebxml.registry.bindings.rim.OrganizationType;
+import org.oasis.ebxml.registry.bindings.rim.RegistryObjectListType;
 import org.oasis.ebxml.registry.bindings.rim.RegistryObjectType;
 import org.oasis.ebxml.registry.bindings.rim.RegistryPackageType;
 import org.oasis.ebxml.registry.bindings.rim.ServiceBindingType;
@@ -779,12 +780,26 @@ public class BusinessQueryManager extends QueryManager implements javax.xml.regi
 					ClassificationSchemeType cs = (ClassificationSchemeType)res;
 					cs.getClassificationNode().addAll(getChildrens(res.getId()));
 					return cs;
-				}
-				if (res instanceof ClassificationNodeType) {
+				} else if (res instanceof ClassificationNodeType) {
 					ClassificationNodeType cn = (ClassificationNodeType)res;
 					cn.getClassificationNode().addAll(getChildrens(res.getId()));
 					return cn;					
+				} else if (res instanceof RegistryPackageType) {
+					RegistryPackageType rp = (RegistryPackageType)res;
+					RegistryObjectListType members = rimFac.createRegistryObjectListType();
+					Collection<AssociationType1> ass = this.findAssociations(id);
+					Iterator<AssociationType1> iter = ass.iterator();
+					while (iter.hasNext()) {
+						AssociationType1 a = iter.next();
+						if (a.getAssociationType().equals(CanonicalConstants.CANONICAL_ASSOCIATION_TYPE_ID_HasMember)) {
+							RegistryObjectType target = getRegistryObjectType(a.getTargetObject());
+							members.getIdentifiable().add((JAebXRClient.getInstance().getLifeCycleManager().createRegistryObject(target)));
+						}
+					}
+					rp.setRegistryObjectList(members);
+					return rp;
 				}
+					
 					
 			}
 			
@@ -849,7 +864,7 @@ public class BusinessQueryManager extends QueryManager implements javax.xml.regi
 	}
 	
 	// TODO
-	public Collection<RegistryObjectType> getRegistryObjectTypes(String objectType) throws JAebXRException {
+	public Collection<RegistryObjectType> getRegistryObjectsByObjectType(String objectType) throws JAebXRException {
 		String query = "SELECT ro.* FROM RegistryObject ro WHERE objectType='" + objectType + "'";
 
 		AdhocQueryType aqt = dqm.createQuery(CanonicalConstants.CANONICAL_QUERY_LANGUAGE_LID_SQL_92, query);
