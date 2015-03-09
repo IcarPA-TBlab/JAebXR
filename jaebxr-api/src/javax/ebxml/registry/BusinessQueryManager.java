@@ -126,6 +126,40 @@ public class BusinessQueryManager extends QueryManager implements javax.xml.regi
 		return bqm.findServices(arg0, arg1, arg2, arg3, arg4);
 	}
 
+	public Collection<AssociationType1> findAssociations(RegistryObjectType ro) throws JAebXRException {
+		StringFilterType lf = queryFac.createStringFilterType();		
+		lf.setComparator(SimpleFilterType.Comparator.EQ);
+		lf.setDomainAttribute("sourceObject");
+		lf.setValue(ro.getId());
+
+		StringFilterType rf = queryFac.createStringFilterType();		
+		lf.setComparator(SimpleFilterType.Comparator.EQ);
+		lf.setDomainAttribute("targetObject");
+		lf.setValue(ro.getId());
+
+		CompoundFilterType cf = queryFac.createCompoundFilterType();
+		cf.setLeftFilter(lf);
+		cf.setRightFilter(rf);
+		
+		AssociationQueryType q = queryFac.createAssociationQueryType();
+		q.setPrimaryFilter(cf);
+		JAXBElement<AssociationQueryType> ebq = queryFac.createAssociationQuery(q);
+
+		AdhocQueryType aqt = dqm.createQuery(CanonicalConstants.CANONICAL_QUERY_LANGUAGE_LID_ebRSFilterQuery, ebq);
+		AdhocQueryResponse rr = (AdhocQueryResponse) dqm.executeQuery(aqt);
+
+		Collection<AssociationType1> res = new ArrayList<AssociationType1>();
+
+		if (isStatusSuccess(rr)) {
+			Iterator<JAXBElement<? extends IdentifiableType>> i = rr.getRegistryObjectList().getIdentifiable().iterator();
+			while (i.hasNext())
+				res.add((AssociationType1)i.next().getValue());
+		}
+
+		return res;
+	}
+	
+	
 	public ClassificationSchemeType findClassificationSchemeByName(String name) throws JAebXRException {
 		StringFilterType f = queryFac.createStringFilterType();		
 		f.setComparator(SimpleFilterType.Comparator.EQ);
@@ -209,9 +243,6 @@ public class BusinessQueryManager extends QueryManager implements javax.xml.regi
 				res.add(node);
 			}
 		}
-
-		if (res.size() == 0)
-			res = null;
 
 		return res;
 	}
