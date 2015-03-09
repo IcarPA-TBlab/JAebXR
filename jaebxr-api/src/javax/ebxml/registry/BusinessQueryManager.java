@@ -126,20 +126,21 @@ public class BusinessQueryManager extends QueryManager implements javax.xml.regi
 		return bqm.findServices(arg0, arg1, arg2, arg3, arg4);
 	}
 
-	public Collection<AssociationType1> findAssociations(RegistryObjectType ro) throws JAebXRException {
+	public Collection<AssociationType1> findAssociations(String roId) throws JAebXRException {
 		StringFilterType lf = queryFac.createStringFilterType();		
 		lf.setComparator(SimpleFilterType.Comparator.EQ);
 		lf.setDomainAttribute("sourceObject");
-		lf.setValue(ro.getId());
+		lf.setValue(roId);
 
 		StringFilterType rf = queryFac.createStringFilterType();		
-		lf.setComparator(SimpleFilterType.Comparator.EQ);
-		lf.setDomainAttribute("targetObject");
-		lf.setValue(ro.getId());
+		rf.setComparator(SimpleFilterType.Comparator.EQ);
+		rf.setDomainAttribute("targetObject");
+		rf.setValue(roId);
 
 		CompoundFilterType cf = queryFac.createCompoundFilterType();
 		cf.setLeftFilter(lf);
 		cf.setRightFilter(rf);
+		cf.setLogicalOperator(CompoundFilterType.LogicalOperator.OR);
 		
 		AssociationQueryType q = queryFac.createAssociationQueryType();
 		q.setPrimaryFilter(cf);
