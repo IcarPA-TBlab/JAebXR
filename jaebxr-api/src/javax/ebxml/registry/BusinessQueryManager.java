@@ -49,10 +49,9 @@ public class BusinessQueryManager extends QueryManager implements javax.xml.regi
 	private DeclarativeQueryManager dqm = null;
 	private Cache<String, RegistryObjectType> cache = null;
 
-	public BusinessQueryManager(DeclarativeQueryManager qm, Cache<String, RegistryObjectType> c) throws JAXRException {
+	public BusinessQueryManager(DeclarativeQueryManager qm) throws JAXRException {
 		super();
 		this.dqm = qm;
-		this.cache = c;
 		this.setSOAPMessenger(ConfigurationFactory.getInstance().getSOAPMessenger());
 	}
 	
@@ -63,13 +62,16 @@ public class BusinessQueryManager extends QueryManager implements javax.xml.regi
 	 		this.dqm = (DeclarativeQueryManager) rs.getDeclarativeQueryManager();
 			this.setRegistryService(rs);
 			this.setQueryManager(bqm);
-			this.cache = JAebXRClient.getInstance().getCache();
 		}
 		this.setSOAPMessenger(ConfigurationFactory.getInstance().getSOAPMessenger());
 	}
 
 	public javax.xml.registry.BusinessQueryManager getBusinessQueryManager() {
 		return bqm;
+	}
+	
+	public void setCache(Cache<String, RegistryObjectType> c) {
+		this.cache = c;
 	}
 	
 	@SuppressWarnings("rawtypes")

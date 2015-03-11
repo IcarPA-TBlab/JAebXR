@@ -11,10 +11,15 @@ import java.security.UnrecoverableKeyException;
 import java.security.cert.CertificateException;
 import java.security.cert.X509Certificate;
 import java.util.Properties;
+import java.util.concurrent.TimeUnit;
 
 import javax.ebxml.registry.security.CredentialInfo;
 import javax.ebxml.registry.soap.SOAPMessenger;
 import javax.xml.registry.JAXRException;
+
+import org.cache2k.Cache;
+import org.cache2k.CacheBuilder;
+import org.oasis.ebxml.registry.bindings.rim.RegistryObjectType;
 
 public class ConfigurationFactory {
     public static boolean EXTERNALFILE = true;
@@ -30,12 +35,15 @@ public class ConfigurationFactory {
     private static String registryUUID;
     private static String registryDriverName;
     private static String connectionFactoryClass;
+    private static int cacheExpirationTime;
+    private static int cacheMaxSize;
     private static Properties properties = new Properties();
 	private static KeyStore keyStore;
 	private static java.security.cert.Certificate[] certs;
 	private static java.security.PrivateKey privateKey;
 	private static CredentialInfo credentialInfo;
 	private static SOAPMessenger msgr;
+	private static Cache<String, RegistryObjectType> cache;
 
     public static ConfigurationFactory getInstance() throws JAXRException {
         if (instance == null) {
@@ -117,6 +125,18 @@ public class ConfigurationFactory {
     	return (X509Certificate) certs[0];
     }
     
+    public Cache<String, RegistryObjectType> getCache() {
+    	return cache;
+    }
+    
+    public int getCacheExpirationTime() {
+    	return cacheExpirationTime;
+    }
+    
+    public int getCacheMaxSize() {
+    	return cacheMaxSize;
+    }
+    
     private void loadProperties() throws JAXRException {
         synchronized (properties) {
             properties = new Properties();
@@ -145,6 +165,9 @@ public class ConfigurationFactory {
         
         this.setConnectionFactoryClass(properties.getProperty("connectionFactoryClass"));
         
+        this.setCacheExpirationTime(properties.getProperty("cacheExpirationTime"));
+        this.setCacheMaxSize(properties.getProperty("cacheMaxSize"));
+        
         try {
 			keyStore = KeyStore.getInstance("JKS");
 	        keyStore.load(new FileInputStream(getClientKeystorePath()), stringToCharArray(getClientKeystorePass()));
@@ -154,6 +177,11 @@ public class ConfigurationFactory {
 			credentialInfo = new CredentialInfo(getClientAlias(), (X509Certificate) certs[0], certs, privateKey);
 			
 			msgr = new SOAPMessenger(getClientRegistryUrl(), credentialInfo);
+			
+			cache = CacheBuilder.newCache(String.class, RegistryObjectType.class)
+					.name("JAebXRClient")
+					.expiryDuration(getCacheExpirationTime(), TimeUnit.MINUTES)
+					.maxSize(getCacheMaxSize()*1024).build();
 		} catch (KeyStoreException | NoSuchAlgorithmException | CertificateException | IOException | UnrecoverableKeyException e) {
 			throw new JAXRException(e);
 		}
@@ -209,5 +237,21 @@ public class ConfigurationFactory {
     
     public synchronized void setConnectionFactoryClass(String connectionFactoryClass) {
     	ConfigurationFactory.connectionFactoryClass = connectionFactoryClass;
+    }
+    
+    public synchronized void setCacheExpirationTime(String s_cacheExpirationTime) { 	
+    	try {
+    		ConfigurationFactory.cacheExpirationTime = Integer.parseInt(s_cacheExpirationTime);    		
+    	} catch (NumberFormatException e) {
+    		ConfigurationFactory.cacheExpirationTime = 15; //default 15 minutes
+    	}
+    }
+
+    public synchronized void setCacheMaxSize(String s_cacheMaxSize) { 	
+    	try {
+    		ConfigurationFactory.cacheMaxSize = Integer.parseInt(s_cacheMaxSize);    		
+    	} catch (NumberFormatException e) {
+    		ConfigurationFactory.cacheMaxSize = 512; //default 512 KB
+    	}
     }
 }

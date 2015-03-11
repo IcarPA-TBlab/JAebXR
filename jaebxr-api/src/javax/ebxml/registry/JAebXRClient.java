@@ -2,9 +2,6 @@ package javax.ebxml.registry;
 
 import javax.xml.registry.JAXRException;
 
-import org.cache2k.Cache;
-import org.oasis.ebxml.registry.bindings.rim.RegistryObjectType;
-
 public class JAebXRClient {
 
 	private static JAebXRClient instance = null;
@@ -19,8 +16,6 @@ public class JAebXRClient {
 	private static org.oasis.ebxml.registry.bindings.lcm.ObjectFactory lcmOF = new org.oasis.ebxml.registry.bindings.lcm.ObjectFactory();
 	private static org.oasis.ebxml.registry.bindings.rs.ObjectFactory rsOF = new org.oasis.ebxml.registry.bindings.rs.ObjectFactory();
 
-	private static Cache<String, RegistryObjectType> cache = null;
-	
     protected static String idPrefix = "urn:uuid:";
 
     public static JAebXRClient getInstance() throws JAebXRException {
@@ -31,15 +26,11 @@ public class JAebXRClient {
     
     private JAebXRClient() throws JAebXRException {
     	try {
-    		ConfigurationFactory.getInstance();
-    		service = new RegistryService(null);
-    		cache = service.getCache();
+    		ConfigurationFactory conf = ConfigurationFactory.getInstance();
+    		service = new RegistryService(conf.getCache());
 			lcm = service.getBusinessLifeCycleManager();
-			bqm = service.getBusinessQueryManager();
 			dqm = service.getDeclarativeQueryManager();
-//			lcm = new BusinessLifeCycleManager(null);
-//			dqm = new DeclarativeQueryManager(null);
-//			bqm = new BusinessQueryManager(dqm);
+			bqm = service.getBusinessQueryManager();
 		} catch (JAXRException e) {
 			throw new JAebXRException(e);
 		}
@@ -59,10 +50,6 @@ public class JAebXRClient {
 				throw new JAebXRException(e);
 			}
     	}
-    }
-    
-    public Cache<String, RegistryObjectType> getCache() {
-    	return cache;
     }
     
     public Connection getConnection() {
