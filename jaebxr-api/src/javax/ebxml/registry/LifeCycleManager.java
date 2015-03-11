@@ -46,6 +46,7 @@ import javax.xml.registry.infomodel.SpecificationLink;
 import javax.xml.registry.infomodel.TelephoneNumber;
 import javax.xml.registry.infomodel.User;
 
+import org.cache2k.Cache;
 import org.oasis.ebxml.registry.bindings.lcm.RemoveObjectsRequest;
 import org.oasis.ebxml.registry.bindings.lcm.SubmitObjectsRequest;
 import org.oasis.ebxml.registry.bindings.lcm.UpdateObjectsRequest;
@@ -86,6 +87,8 @@ public class LifeCycleManager extends CanonicalConstants implements javax.xml.re
     private javax.xml.registry.LifeCycleManager lcm = null;
 	private RegistryService rs = null;
 	
+	protected Cache<String, RegistryObjectType> cache = null;
+
 	private SOAPMessenger msgr = null;
 	
 	private static BindingUtility bu = BindingUtility.getInstance();
@@ -104,6 +107,10 @@ public class LifeCycleManager extends CanonicalConstants implements javax.xml.re
         //cmsFac = new org.oasis.ebxml.registry.bindings.cms.ObjectFactory();		
 	}
 	
+	protected void setCache(Cache<String, RegistryObjectType> c) {
+		this.cache = c;
+	}
+	
 	protected void setSOAPMessenger(SOAPMessenger msgr) {
 		this.msgr = msgr;
 	}
@@ -115,7 +122,39 @@ public class LifeCycleManager extends CanonicalConstants implements javax.xml.re
     protected void setRegistryService(RegistryService rs) {
     	this.rs = rs;
     }
+    
+    /*
+    public boolean isStatusSuccess(RegistryResponseType rr) {
+    	return rr.getStatus().equals(CanonicalConstants.CANONICAL_RESPONSE_STATUS_TYPE_LID_Success);
+    }
+    */
 
+    public RegistryResponseType checkResponseAndRemoveFromCache(RegistryResponseType r, String id) {
+    	if (r.getStatus().equals(CanonicalConstants.CANONICAL_RESPONSE_STATUS_TYPE_LID_Success))
+    		cache.remove(id);
+    	return r;
+    }
+
+    public RegistryResponseType checkResponseAndRemoveFromCache(RegistryResponseType r, Collection<?> ids) {
+    	if (r.getStatus().equals(CanonicalConstants.CANONICAL_RESPONSE_STATUS_TYPE_LID_Success)) {
+    		Iterator<?> it = ids.iterator();
+    		while (it.hasNext()) {
+    			Object o = it.next();
+    			if (o instanceof String)
+    				cache.remove((String)o);
+    			else
+    				cache.remove(((RegistryObjectType)o).getId());
+    		}
+    	}
+    	return r;
+    }
+
+    public RegistryResponseType checkResponseAndSaveToCache(RegistryResponseType r, RegistryObjectType ro) {
+    	if (r.getStatus().equals(CanonicalConstants.CANONICAL_RESPONSE_STATUS_TYPE_LID_Success))
+    		cache.put(ro.getId(), ro);
+    	return r;
+    }
+    
     @Override
 	public Association createAssociation(RegistryObject arg0, Concept arg1)
 			throws JAXRException {
@@ -145,12 +184,13 @@ public class LifeCycleManager extends CanonicalConstants implements javax.xml.re
     	if (description != null)
     		a.setDescription(createInternationalStringType(description));
     	a.setAssociationType(type);
+    	a.setObjectType(CANONICAL_OBJECT_TYPE_ID_Association);
     	return a;
     }
     
     public ClassificationType createClassification() {
     	ClassificationType c = rimFac.createClassificationType();
-    	
+    	c.setObjectType(CANONICAL_OBJECT_TYPE_ID_Classification);
 		return c;	
     }
     
@@ -191,6 +231,7 @@ public class LifeCycleManager extends CanonicalConstants implements javax.xml.re
 		c.setId(this.createUUID());
 		c.setLid(c.getId());
 		c.setClassificationScheme(scheme.getId());
+		c.setObjectType(CANONICAL_OBJECT_TYPE_ID_Classification);
 		
 		if (name != null)
 			c.setName(createInternationalStringType(name));
@@ -209,6 +250,7 @@ public class LifeCycleManager extends CanonicalConstants implements javax.xml.re
 		c.setId(this.createUUID());
 		c.setLid(c.getId());
 		c.setClassificationNode(node.getId());
+		c.setObjectType(CANONICAL_OBJECT_TYPE_ID_Classification);
 		
 		if (name != null)
 			c.setName(name);
@@ -247,6 +289,7 @@ public class LifeCycleManager extends CanonicalConstants implements javax.xml.re
 		cs.getExternalIdentifier().addAll(cn.getExternalIdentifier());
 		cs.setNodeType(CANONICAL_NODE_TYPE_ID_UniqueCode);
 		cs.setIsInternal(true);
+		cs.setObjectType(CANONICAL_OBJECT_TYPE_ID_ClassificationScheme);
 		return cs;
 	}
 	
@@ -261,6 +304,7 @@ public class LifeCycleManager extends CanonicalConstants implements javax.xml.re
 		cs.setName(name);
 		cs.setDescription(description);
 		cs.setIsInternal(true);
+		cs.setObjectType(CANONICAL_OBJECT_TYPE_ID_ClassificationScheme);
 		return cs;
 	}
 
@@ -294,6 +338,7 @@ public class LifeCycleManager extends CanonicalConstants implements javax.xml.re
 		cn.setName(name);
 		cn.setCode(value);
 		cn.setDescription(name);
+		cn.setObjectType(CANONICAL_OBJECT_TYPE_ID_ClassificationNode);
 		return cn;
 	}
 
@@ -352,6 +397,7 @@ public class LifeCycleManager extends CanonicalConstants implements javax.xml.re
 		ei.setIdentificationScheme(scheme.getId());
 		ei.setName(name);
 		ei.setValue(value);
+		ei.setObjectType(CANONICAL_OBJECT_TYPE_ID_ExternalIdentifier);
 		return ei;
 	}
 	
@@ -428,6 +474,7 @@ public class LifeCycleManager extends CanonicalConstants implements javax.xml.re
 		el.setLid(el.getId());
 		el.setExternalURI(externalURI);
 		el.setDescription(description);
+		el.setObjectType(CANONICAL_OBJECT_TYPE_ID_ExternalLink);
 		return el;
 	}
 	
@@ -460,7 +507,7 @@ public class LifeCycleManager extends CanonicalConstants implements javax.xml.re
 		ExtrinsicObjectType eo = rimFac.createExtrinsicObjectType();
 		eo.setId(this.createUUID());
 		eo.setLid(eo.getId());
-		eo.setObjectType("urn:oasis:names:tc:ebxml-regrep:ObjectType:RegistryObject:ExtrinsicObject");
+		eo.setObjectType(CANONICAL_OBJECT_TYPE_ID_ExtrinsicObject);
 		
 		if (name != null)
 			eo.setName(createInternationalStringType(name));
@@ -517,6 +564,7 @@ public class LifeCycleManager extends CanonicalConstants implements javax.xml.re
        	f.setLid(f.getId());
     	f.setName(createInternationalStringType(name));
     	if (description != null) f.setDescription(createInternationalStringType(description));
+    	f.setObjectType(CANONICAL_OBJECT_TYPE_ID_Federation);
     	return f;
     }
 
@@ -680,6 +728,7 @@ public class LifeCycleManager extends CanonicalConstants implements javax.xml.re
 		o.setId(this.createUUID());
 		o.setLid(o.getId());
 		o.setName(name);
+		o.setObjectType(CANONICAL_OBJECT_TYPE_ID_Organization);
 		return o;
 	}
 	
@@ -719,6 +768,7 @@ public class LifeCycleManager extends CanonicalConstants implements javax.xml.re
 		p.setLid(p.getId());
 		p.setName(createInternationalStringType(""));
 		p.setPersonName(createPersonNameType(""));
+		p.setObjectType(CANONICAL_OBJECT_TYPE_ID_Person);
 		return p;
 	}
 	
@@ -787,6 +837,7 @@ public class LifeCycleManager extends CanonicalConstants implements javax.xml.re
     		ro.setName(name);
     	if (desc != null)
     		ro.setDescription(desc);
+    	ro.setObjectType(CANONICAL_OBJECT_TYPE_ID_RegistryObject);
     	return ro;
     }
 
@@ -816,6 +867,7 @@ public class LifeCycleManager extends CanonicalConstants implements javax.xml.re
 		rp.setId(this.createUUID());
 		rp.setLid(rp.getId());
 		rp.setName(name);
+		rp.setObjectType(CANONICAL_OBJECT_TYPE_ID_RegistryPackage);
 		return rp;
 	}
 	
@@ -835,6 +887,7 @@ public class LifeCycleManager extends CanonicalConstants implements javax.xml.re
     	r.setName(createInternationalStringType(name));
     	if (description != null)
     		r.setDescription(createInternationalStringType(description));
+    	r.setObjectType(CANONICAL_OBJECT_TYPE_ID_Registry);
     	return r;
     }
 
@@ -862,6 +915,7 @@ public class LifeCycleManager extends CanonicalConstants implements javax.xml.re
 		st.setId(this.createUUID());
 		st.setLid(st.getId());
 		st.setName(name);
+		st.setObjectType(CANONICAL_OBJECT_TYPE_ID_Service);
 		return st;
 	}
 	
@@ -887,6 +941,7 @@ public class LifeCycleManager extends CanonicalConstants implements javax.xml.re
 		ServiceBindingType sb = rimFac.createServiceBindingType();
 		sb.setId(this.createUUID());
 		sb.setLid(sb.getId());
+		sb.setObjectType(CANONICAL_OBJECT_TYPE_ID_ServiceBinding);
 		return sb;
 	}
 	
@@ -936,6 +991,7 @@ public class LifeCycleManager extends CanonicalConstants implements javax.xml.re
 		SpecificationLinkType sl = rimFac.createSpecificationLinkType();
 		sl.setId(this.createUUID());
 		sl.setLid(sl.getId());
+		sl.setObjectType(CANONICAL_OBJECT_TYPE_ID_SpecificationLink);
 		return sl;
 	}
 	
@@ -957,6 +1013,7 @@ public class LifeCycleManager extends CanonicalConstants implements javax.xml.re
 		UserType u = rimFac.createUserType();
 		u.setId(this.createUUID());
 		u.setLid(u.getId());
+		u.setObjectType(CANONICAL_OBJECT_TYPE_ID_User);
 		return u;
 	}
 
@@ -1110,32 +1167,32 @@ public class LifeCycleManager extends CanonicalConstants implements javax.xml.re
 
     public RegistryResponseType saveObjectType(AssociationType1 a) throws JAebXRException {
     	JAXBElement<AssociationType1> eb = createAssociation(a);
-    	return saveObjectType(eb);
+    	return checkResponseAndSaveToCache(saveObjectType(eb), a);
     }
 
     public RegistryResponseType saveObjectType(ClassificationNodeType cs) throws JAebXRException {
     	JAXBElement<ClassificationNodeType> eb = createClassificationNode(cs);
-    	return saveObjectType(eb);
+    	return checkResponseAndSaveToCache(saveObjectType(eb), cs);
     }
     
     public RegistryResponseType saveObjectType(ClassificationSchemeType cs) throws JAebXRException {
     	JAXBElement<ClassificationSchemeType> eb = createClassificationScheme(cs);
-    	return saveObjectType(eb);
+    	return checkResponseAndSaveToCache(saveObjectType(eb), cs);
     }
     
     public RegistryResponseType saveObjectType(ClassificationType c) throws JAebXRException {
     	JAXBElement<ClassificationType> eb = createClassification(c);
-    	return saveObjectType(eb);
+    	return checkResponseAndSaveToCache(saveObjectType(eb), c);
     }
 
     public RegistryResponseType saveObjectType(ExternalLinkType cn) throws JAebXRException {
     	JAXBElement<ExternalLinkType> eb = rimFac.createExternalLink(cn);
-    	return saveObjectType(eb);
+    	return checkResponseAndSaveToCache(saveObjectType(eb), cn);
     }
   
     public RegistryResponseType saveObjectType(RegistryType cn) throws JAebXRException {
     	JAXBElement<RegistryType> eb = createRegistry(cn);
-    	return saveObjectType(eb);
+    	return checkResponseAndSaveToCache(saveObjectType(eb), cn);
     }
   
     public RegistryResponseType saveObjectType(ExtrinsicObjectType eo) throws JAebXRException {
@@ -1165,22 +1222,22 @@ public class LifeCycleManager extends CanonicalConstants implements javax.xml.re
     
     public RegistryResponseType saveObjectType(OrganizationType o) throws JAebXRException {
     	JAXBElement<OrganizationType> eb = createOrganization(o);
-    	return saveObjectType(eb);
+    	return checkResponseAndSaveToCache(saveObjectType(eb), o);
     }
 
     public RegistryResponseType saveObjectType(PersonType o) throws JAebXRException {
     	JAXBElement<PersonType> eb = createPerson(o);
-    	return saveObjectType(eb);
+    	return checkResponseAndSaveToCache(saveObjectType(eb), o);
     }
     
     public RegistryResponseType saveObjectType(RegistryPackageType cn) throws JAebXRException {
     	JAXBElement<RegistryPackageType> eb = createRegistryPackage(cn);
-    	return saveObjectType(eb);
+    	return checkResponseAndSaveToCache(saveObjectType(eb), cn);
     }
     
     public RegistryResponseType saveObjectType(ServiceType s) throws JAebXRException {
     	JAXBElement<ServiceType> eb = createService(s);
-    	return saveObjectType(eb);
+    	return checkResponseAndSaveToCache(saveObjectType(eb), s);
     }
 
     public RegistryResponseType saveFederations(Collection<FederationType> f) throws JAebXRException {
@@ -1206,6 +1263,7 @@ public class LifeCycleManager extends CanonicalConstants implements javax.xml.re
 
     public RegistryResponseType updateObjectType(RegistryObjectType o) throws JAebXRException {
     	o.setId(this.createUUID());
+    	cache.remove(o.getId());
     	
     	if (o.getClassification() != null) {
     		List<ClassificationType> c = o.getClassification();
@@ -1214,6 +1272,8 @@ public class LifeCycleManager extends CanonicalConstants implements javax.xml.re
     			(i.next()).setClassifiedObject(o.getId());
     	}
     	
+    	cache.put(o.getId(), o);
+
     	JAXBElement<? extends IdentifiableType> eb = null;
     	
 		if (o instanceof AssociationType1)
@@ -1285,6 +1345,9 @@ public class LifeCycleManager extends CanonicalConstants implements javax.xml.re
     			throw new JAebXRException("Object not yet supported: " + o.getClass().getName());
     		    		
     		list.add(eb);
+    		
+    		RegistryObjectType ro = (RegistryObjectType)o;
+    		cache.put(ro.getId(), ro);
     	};
     	SubmitObjectsRequest sreq = createSubmitObjectsRequest(list);
     	RegistryResponseType resp = saveObjectTypes(sreq);
@@ -1293,8 +1356,7 @@ public class LifeCycleManager extends CanonicalConstants implements javax.xml.re
     
     public RegistryResponseType deleteObjectType(String id) throws JAebXRException {
     	RemoveObjectsRequest sreq = createRemoveObjectsRequest(id);
-    	RegistryResponseType resp = deleteObjectTypes(sreq);
-    	return resp;    	
+    	return checkResponseAndRemoveFromCache(deleteObjectTypes(sreq), id);
     }
 
     public RegistryResponseType deleteObjectTypes(Collection<?> ass) throws JAebXRException {
@@ -1302,8 +1364,7 @@ public class LifeCycleManager extends CanonicalConstants implements javax.xml.re
     		return handleNullParam();
     	
     	RemoveObjectsRequest sreq = createRemoveObjectsRequest(ass);
-    	RegistryResponseType resp = deleteObjectTypes(sreq);
-    	return resp;    	
+    	return checkResponseAndRemoveFromCache(deleteObjectTypes(sreq), ass);
     }
     
     /*

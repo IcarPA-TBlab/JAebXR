@@ -6,5 +6,7 @@
 	<classpathentry kind="lib" path="lib/jaxr-api.jar"/>
 	<classpathentry kind="lib" path="lib/wss4j-1.6.4.jar"/>
 	<classpathentry kind="lib" path="lib/mail.jar"/>
+	<classpathentry kind="lib" path="lib/cache2k-api-0.21.jar"/>
+	<classpathentry kind="lib" path="lib/cache2k-core-0.21.jar"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>

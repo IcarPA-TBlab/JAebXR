@@ -10,6 +10,7 @@ import javax.xml.registry.InvalidRequestException;
 import javax.xml.registry.JAXRException;
 import javax.xml.registry.infomodel.Association;
 
+import org.cache2k.Cache;
 import org.oasis.ebxml.registry.bindings.lcm.SetStatusOnObjectsRequest;
 import org.oasis.ebxml.registry.bindings.lcm.SubmitObjectsRequest;
 import org.oasis.ebxml.registry.bindings.rim.AssociationType1;
@@ -26,12 +27,13 @@ public class BusinessLifeCycleManager extends LifeCycleManager implements javax.
 
 	private javax.xml.registry.BusinessLifeCycleManager blcm = null;
 	
-	public BusinessLifeCycleManager(RegistryService rs) throws JAXRException {
+	public BusinessLifeCycleManager(RegistryService rs, Cache<String, RegistryObjectType> c) throws JAXRException {
 		super();
 		if (rs != null) {
 			this.blcm = rs.getBusinessLifeCycleManager();
 			this.setRegistryService(rs);
 		}
+		this.setCache(c);
 		this.setLifeCycleManager(blcm);
 		this.setSOAPMessenger(ConfigurationFactory.getInstance().getSOAPMessenger());
 	}

@@ -12,6 +12,7 @@ import javax.xml.registry.infomodel.ClassificationScheme;
 import javax.xml.registry.infomodel.Concept;
 import javax.xml.registry.infomodel.Key;
 
+import org.cache2k.Cache;
 import org.oasis.ebxml.registry.bindings.query.AdhocQueryResponse;
 import org.oasis.ebxml.registry.bindings.query.AssociationQueryType;
 import org.oasis.ebxml.registry.bindings.query.ClassificationNodeQueryType;
@@ -46,10 +47,12 @@ public class BusinessQueryManager extends QueryManager implements javax.xml.regi
 
 	private javax.xml.registry.BusinessQueryManager bqm = null;
 	private DeclarativeQueryManager dqm = null;
+	private Cache<String, RegistryObjectType> cache = null;
 
-	public BusinessQueryManager(DeclarativeQueryManager qm) throws JAXRException {
+	public BusinessQueryManager(DeclarativeQueryManager qm, Cache<String, RegistryObjectType> c) throws JAXRException {
 		super();
 		this.dqm = qm;
+		this.cache = c;
 		this.setSOAPMessenger(ConfigurationFactory.getInstance().getSOAPMessenger());
 	}
 	
@@ -60,6 +63,7 @@ public class BusinessQueryManager extends QueryManager implements javax.xml.regi
 	 		this.dqm = (DeclarativeQueryManager) rs.getDeclarativeQueryManager();
 			this.setRegistryService(rs);
 			this.setQueryManager(bqm);
+			this.cache = JAebXRClient.getInstance().getCache();
 		}
 		this.setSOAPMessenger(ConfigurationFactory.getInstance().getSOAPMessenger());
 	}
@@ -163,6 +167,8 @@ public class BusinessQueryManager extends QueryManager implements javax.xml.regi
 	
 	
 	public ClassificationSchemeType findClassificationSchemeByName(String name) throws JAebXRException {
+		ClassificationSchemeType res = null;
+		
 		StringFilterType f = queryFac.createStringFilterType();		
 		f.setComparator(SimpleFilterType.Comparator.EQ);
 		f.setDomainAttribute("name");
@@ -175,13 +181,12 @@ public class BusinessQueryManager extends QueryManager implements javax.xml.regi
 		AdhocQueryType aqt = dqm.createQuery(CanonicalConstants.CANONICAL_QUERY_LANGUAGE_LID_ebRSFilterQuery, ebq);
 		AdhocQueryResponse rr = (AdhocQueryResponse) dqm.executeQuery(aqt);
 
-		ClassificationSchemeType res = null;
-		
 		if (isStatusSuccess(rr)) {
 			Iterator<JAXBElement<? extends IdentifiableType>> i = rr.getRegistryObjectList().getIdentifiable().iterator();
 			if (i.hasNext()) {
 				res = (ClassificationSchemeType) i.next().getValue();
 				res.getClassificationNode().addAll(getChildrens(res.getId()));
+				cache.put(res.getId(), res);
 			}
 			
 	        if (i.hasNext()) {
@@ -193,6 +198,8 @@ public class BusinessQueryManager extends QueryManager implements javax.xml.regi
 	}
 
 	public ClassificationSchemeType findClassificationSchemeByPattern(String namePattern) throws JAebXRException {
+		ClassificationSchemeType res = null;
+		
 		StringFilterType f = queryFac.createStringFilterType();		
 		f.setComparator(SimpleFilterType.Comparator.LIKE);
 		f.setDomainAttribute("name");
@@ -205,13 +212,12 @@ public class BusinessQueryManager extends QueryManager implements javax.xml.regi
 		AdhocQueryType aqt = dqm.createQuery(CanonicalConstants.CANONICAL_QUERY_LANGUAGE_LID_ebRSFilterQuery, ebq);
 		AdhocQueryResponse rr = (AdhocQueryResponse) dqm.executeQuery(aqt);
 
-		ClassificationSchemeType res = null;
-		
 		if (isStatusSuccess(rr)) {
 			Iterator<JAXBElement<? extends IdentifiableType>> i = rr.getRegistryObjectList().getIdentifiable().iterator();
 			if (i.hasNext()) {
 				res = (ClassificationSchemeType) i.next().getValue();
 				res.getClassificationNode().addAll(getChildrens(res.getId()));
+				cache.put(res.getId(), res);
 			}
 			
 	        if (i.hasNext()) {
@@ -250,6 +256,10 @@ public class BusinessQueryManager extends QueryManager implements javax.xml.regi
 	}
 	
 	public ClassificationNodeType findClassificationNodeByPath(String path) throws JAebXRException {
+		ClassificationNodeType res = (ClassificationNodeType) cache.peek(path);
+		if (res != null)
+			return res;
+		
 		StringTokenizer st = new StringTokenizer(path, "/");		
 		String parent = st.nextToken();
 		String code = st.nextToken();
@@ -276,13 +286,12 @@ public class BusinessQueryManager extends QueryManager implements javax.xml.regi
 		AdhocQueryType aqt = dqm.createQuery(CanonicalConstants.CANONICAL_QUERY_LANGUAGE_LID_ebRSFilterQuery, ebq);
 		AdhocQueryResponse rr = (AdhocQueryResponse) dqm.executeQuery(aqt);
 		
-		ClassificationNodeType res = null;
-		
 		if (isStatusSuccess(rr)) {
 			Iterator<JAXBElement<? extends IdentifiableType>> i = rr.getRegistryObjectList().getIdentifiable().iterator();
 			if (i.hasNext()) {
 				res = (ClassificationNodeType) i.next().getValue();
 				res.getClassificationNode().addAll(getChildrens(res.getId()));
+				cache.put(path, res);
 			}
 		}
 
@@ -376,6 +385,7 @@ public class BusinessQueryManager extends QueryManager implements javax.xml.regi
 			Iterator<JAXBElement<? extends IdentifiableType>> i = rr.getRegistryObjectList().getIdentifiable().iterator();			
 			while (i.hasNext()) {
 				res = (RegistryObjectType) i.next().getValue();
+				cache.put(res.getId(), res);
 			}
 		}
        
@@ -758,6 +768,10 @@ public class BusinessQueryManager extends QueryManager implements javax.xml.regi
 	}
 	
 	public RegistryObjectType getRegistryObjectType(String id) throws JAebXRException {
+		RegistryObjectType res = cache.peek(id);
+		if (res != null)
+			return res;
+		
 		StringFilterType f = queryFac.createStringFilterType();		
 		f.setComparator(SimpleFilterType.Comparator.EQ);
 		f.setDomainAttribute("id");
@@ -770,7 +784,6 @@ public class BusinessQueryManager extends QueryManager implements javax.xml.regi
 		AdhocQueryType aqt = dqm.createQuery(CanonicalConstants.CANONICAL_QUERY_LANGUAGE_LID_ebRSFilterQuery, ebq);
 		AdhocQueryResponse rr = (AdhocQueryResponse) dqm.executeQuery(aqt);
 
-		RegistryObjectType res = null;
 		
 		if (isStatusSuccess(rr)) {
 			Iterator<JAXBElement<? extends IdentifiableType>> i = rr.getRegistryObjectList().getIdentifiable().iterator();
@@ -779,10 +792,12 @@ public class BusinessQueryManager extends QueryManager implements javax.xml.regi
 				if (res instanceof ClassificationSchemeType) {
 					ClassificationSchemeType cs = (ClassificationSchemeType)res;
 					cs.getClassificationNode().addAll(getChildrens(res.getId()));
+					cache.put(id, cs);
 					return cs;
 				} else if (res instanceof ClassificationNodeType) {
 					ClassificationNodeType cn = (ClassificationNodeType)res;
 					cn.getClassificationNode().addAll(getChildrens(res.getId()));
+					cache.put(id, cn);
 					return cn;					
 				} else if (res instanceof RegistryPackageType) {
 					RegistryPackageType rp = (RegistryPackageType)res;
@@ -797,10 +812,9 @@ public class BusinessQueryManager extends QueryManager implements javax.xml.regi
 						}
 					}
 					rp.setRegistryObjectList(members);
+					cache.put(id, rp);
 					return rp;
 				}
-					
-					
 			}
 			
 	        if (i.hasNext()) {
