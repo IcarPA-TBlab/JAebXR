@@ -1217,7 +1217,7 @@ public class LifeCycleManager extends CanonicalConstants implements javax.xml.re
 					throw new JAebXRException(e);
 				}
     	}
-    	return saveObjectType(eb, m);
+    	return checkResponseAndSaveToCache(saveObjectType(eb, m), eo);
     }
     
     public RegistryResponseType saveObjectType(OrganizationType o) throws JAebXRException {
@@ -1367,17 +1367,6 @@ public class LifeCycleManager extends CanonicalConstants implements javax.xml.re
     	return checkResponseAndRemoveFromCache(deleteObjectTypes(sreq), ass);
     }
     
-    /*
-    public RegistryResponseType deleteObjectTypes(Collection<String> c) throws JAebXRException {
-    	if (c == null)
-    		return handleNullParam();
-    	
-    	RemoveObjectsRequest sreq = createRemoveObjectsRequest(c);
-    	RegistryResponseType resp = deleteObjectTypes(sreq);
-    	return resp;    	
-    }
-    */
-
     public RegistryResponseType updateObjectTypes(UpdateObjectsRequest req) throws JAebXRException {
     	return submitObjectTypes(req, null);
     }
