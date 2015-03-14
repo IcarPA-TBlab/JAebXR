@@ -5,6 +5,7 @@ import java.util.Collection;
 
 import javax.ebxml.registry.soap.BindingUtility;
 import javax.ebxml.registry.soap.SOAPMessenger;
+import javax.xml.bind.JAXBElement;
 import javax.xml.bind.JAXBException;
 import javax.xml.registry.BulkResponse;
 import javax.xml.registry.InvalidRequestException;
@@ -14,6 +15,7 @@ import javax.xml.registry.RegistryException;
 import javax.xml.registry.UnsupportedCapabilityException;
 
 import org.oasis.ebxml.registry.bindings.query.AdhocQueryRequest;
+import org.oasis.ebxml.registry.bindings.query.RegistryObjectQueryType;
 import org.oasis.ebxml.registry.bindings.query.ResponseOptionType;
 import org.oasis.ebxml.registry.bindings.query.ResponseOptionType.ReturnType;
 import org.oasis.ebxml.registry.bindings.rim.AdhocQueryType;
@@ -47,30 +49,29 @@ public class DeclarativeQueryManager extends QueryManager implements javax.xml.r
 		return dqm.createQuery(arg0, arg1);
 	}
 
-	public AdhocQueryType createSQLQuery(String query) throws JAebXRException {
-		return createQuery(CanonicalConstants.CANONICAL_QUERY_LANGUAGE_LID_SQL_92, query);
-	}
-	
-	public AdhocQueryType createQuery(String queryType, Object queryString) throws JAebXRException {
-		if ((!queryType.equals(CanonicalConstants.CANONICAL_QUERY_LANGUAGE_LID_ebRSFilterQuery)) &&
-		    (!queryType.equals(CanonicalConstants.CANONICAL_QUERY_LANGUAGE_LID_SQL_92)))
-				throw new JAebXRException("Unsupported query language: " + queryType);
-		
+	public AdhocQueryType createRSFilterQuery(JAXBElement<? extends RegistryObjectQueryType> query) throws JAebXRException {
 		QueryExpressionType qet = rimFac.createQueryExpressionType();
-		qet.setQueryLanguage(queryType);
-		
-		if (queryType.equals(CanonicalConstants.CANONICAL_QUERY_LANGUAGE_LID_SQL_92))
-			qet.getContent().add(queryString);
-		else {
-			try {
-				qet.getContent().add(BindingUtility.getInstance().marshalObject(queryString));
-			} catch (JAXBException e1) {
-				throw new JAebXRException(e1);
-			}
+		qet.setQueryLanguage(CanonicalConstants.CANONICAL_QUERY_LANGUAGE_LID_ebRSFilterQuery);
+
+		try {
+			qet.getContent().add(BindingUtility.getInstance().marshalObject(query));
+		} catch (JAXBException e1) {
+			throw new JAebXRException(e1);
 		}
 
 		AdhocQueryType aqt = rimFac.createAdhocQueryType();
+		aqt.setId(createUUID());		
+		aqt.setQueryExpression(qet);
+
+		return aqt;
+	}
+
+	public AdhocQueryType createSQLQuery(String query) throws JAebXRException {
+		QueryExpressionType qet = rimFac.createQueryExpressionType();
+		qet.setQueryLanguage(CanonicalConstants.CANONICAL_QUERY_LANGUAGE_LID_SQL_92);
+		qet.getContent().add(query);
 		
+		AdhocQueryType aqt = rimFac.createAdhocQueryType();		
 		aqt.setId(createUUID());		
 		aqt.setQueryExpression(qet);
 

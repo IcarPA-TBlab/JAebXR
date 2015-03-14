@@ -46,8 +46,8 @@ import org.oasis.ebxml.registry.bindings.rs.RegistryResponseType;
 public class BusinessQueryManager extends QueryManager implements javax.xml.registry.BusinessQueryManager {
 
 	private javax.xml.registry.BusinessQueryManager bqm = null;
-	private DeclarativeQueryManager dqm = null;
-	private Cache<String, RegistryObjectType> cache = null;
+	protected DeclarativeQueryManager dqm = null;
+	protected Cache<String, RegistryObjectType> cache = null;
 
 	public BusinessQueryManager(DeclarativeQueryManager qm) throws JAXRException {
 		super();
@@ -153,7 +153,7 @@ public class BusinessQueryManager extends QueryManager implements javax.xml.regi
 		q.setPrimaryFilter(cf);
 		JAXBElement<AssociationQueryType> ebq = queryFac.createAssociationQuery(q);
 
-		AdhocQueryType aqt = dqm.createQuery(CanonicalConstants.CANONICAL_QUERY_LANGUAGE_LID_ebRSFilterQuery, ebq);
+		AdhocQueryType aqt = dqm.createRSFilterQuery(ebq);
 		AdhocQueryResponse rr = (AdhocQueryResponse) dqm.executeQuery(aqt);
 
 		Collection<AssociationType1> res = new ArrayList<AssociationType1>();
@@ -180,7 +180,7 @@ public class BusinessQueryManager extends QueryManager implements javax.xml.regi
 		q.setPrimaryFilter(f);
 		JAXBElement<ClassificationSchemeQueryType> ebq = queryFac.createClassificationSchemeQuery(q);
 
-		AdhocQueryType aqt = dqm.createQuery(CanonicalConstants.CANONICAL_QUERY_LANGUAGE_LID_ebRSFilterQuery, ebq);
+		AdhocQueryType aqt = dqm.createRSFilterQuery(ebq);
 		AdhocQueryResponse rr = (AdhocQueryResponse) dqm.executeQuery(aqt);
 
 		if (isStatusSuccess(rr)) {
@@ -211,7 +211,7 @@ public class BusinessQueryManager extends QueryManager implements javax.xml.regi
 		q.setPrimaryFilter(f);
 		JAXBElement<ClassificationSchemeQueryType> ebq = queryFac.createClassificationSchemeQuery(q);
 
-		AdhocQueryType aqt = dqm.createQuery(CanonicalConstants.CANONICAL_QUERY_LANGUAGE_LID_ebRSFilterQuery, ebq);
+		AdhocQueryType aqt = dqm.createRSFilterQuery(ebq);
 		AdhocQueryResponse rr = (AdhocQueryResponse) dqm.executeQuery(aqt);
 
 		if (isStatusSuccess(rr)) {
@@ -240,7 +240,7 @@ public class BusinessQueryManager extends QueryManager implements javax.xml.regi
 		q.setPrimaryFilter(rf);
 		JAXBElement<ClassificationNodeQueryType> ebq = queryFac.createClassificationNodeQuery(q);
 
-		AdhocQueryType aqt = dqm.createQuery(CanonicalConstants.CANONICAL_QUERY_LANGUAGE_LID_ebRSFilterQuery, ebq);
+		AdhocQueryType aqt = dqm.createRSFilterQuery(ebq);
 		AdhocQueryResponse rr = (AdhocQueryResponse) dqm.executeQuery(aqt);
 
 		Collection<ClassificationNodeType> res = new ArrayList<ClassificationNodeType>();
@@ -285,7 +285,7 @@ public class BusinessQueryManager extends QueryManager implements javax.xml.regi
 		q.setPrimaryFilter(cf);
 		JAXBElement<ClassificationNodeQueryType> ebq = queryFac.createClassificationNodeQuery(q);
 
-		AdhocQueryType aqt = dqm.createQuery(CanonicalConstants.CANONICAL_QUERY_LANGUAGE_LID_ebRSFilterQuery, ebq);
+		AdhocQueryType aqt = dqm.createRSFilterQuery(ebq);
 		AdhocQueryResponse rr = (AdhocQueryResponse) dqm.executeQuery(aqt);
 		
 		if (isStatusSuccess(rr)) {
@@ -341,7 +341,7 @@ public class BusinessQueryManager extends QueryManager implements javax.xml.regi
         if (id != null)
                 sqlQuery += " AND a.associationType = '" + id + "'";
         
-        AdhocQueryType q = dqm.createQuery(CanonicalConstants.CANONICAL_QUERY_LANGUAGE_LID_SQL_92, sqlQuery);
+        AdhocQueryType q = dqm.createSQLQuery(sqlQuery);
         AdhocQueryResponse rr = (AdhocQueryResponse) dqm.executeQuery(q);
         
         Collection<AssociationType1> res = new ArrayList<AssociationType1>();
@@ -359,7 +359,7 @@ public class BusinessQueryManager extends QueryManager implements javax.xml.regi
 	public Collection<String> findRegistryObjectsByNamePattern(String namePattern) throws JAebXRException {
         String sqlQuery = "SELECT ro.* FROM RegistryObject ro, Name_ nm WHERE nm.value LIKE '" + namePattern + "' AND ro.id = nm.parent";
         
-        AdhocQueryType q = dqm.createQuery(CanonicalConstants.CANONICAL_QUERY_LANGUAGE_LID_SQL_92, sqlQuery);
+        AdhocQueryType q = dqm.createSQLQuery(sqlQuery);
         AdhocQueryResponse rr = (AdhocQueryResponse) dqm.executeQuery(q);
         
         Collection<String> res = new ArrayList<String>();
@@ -378,7 +378,7 @@ public class BusinessQueryManager extends QueryManager implements javax.xml.regi
 		String sqlQuery = "select ro.* from registryobject ro, name_ nm where ro.id = nm.parent and nm.value = '" + roName + "'" +
 		        " and objecttype = '" + roType + "'";
         
-        AdhocQueryType q = dqm.createQuery(CanonicalConstants.CANONICAL_QUERY_LANGUAGE_LID_SQL_92, sqlQuery);
+        AdhocQueryType q = dqm.createSQLQuery(sqlQuery);
         AdhocQueryResponse rr = (AdhocQueryResponse) dqm.executeQuery(q);
         
         RegistryObjectType res = null;
@@ -397,7 +397,7 @@ public class BusinessQueryManager extends QueryManager implements javax.xml.regi
 	public Collection<RegistryPackageType> findRegistryPackagesByClassification(String cId) throws JAebXRException {
 		String sqlQuery = "select p.* from registrypackage p, classification c where p.id = c.classifiedObject and c.id = '" + cId + "'";
         
-        AdhocQueryType q = dqm.createQuery(CanonicalConstants.CANONICAL_QUERY_LANGUAGE_LID_SQL_92, sqlQuery);
+        AdhocQueryType q = dqm.createSQLQuery(sqlQuery);
         AdhocQueryResponse rr = (AdhocQueryResponse) dqm.executeQuery(q);
         
         Collection<RegistryPackageType> res = new ArrayList<RegistryPackageType>();
@@ -415,7 +415,7 @@ public class BusinessQueryManager extends QueryManager implements javax.xml.regi
 	public Collection<ServiceBindingType> findServiceBindingsByClassificationNode(String id) throws JAebXRException {
         String sqlQuery = "SELECT sb.* FROM ServiceBinding sb WHERE id IN (SELECT servicebinding FROM SpecificationLink WHERE specificationobject = '" + id + "')";
         
-        AdhocQueryType q = dqm.createQuery(CanonicalConstants.CANONICAL_QUERY_LANGUAGE_LID_SQL_92, sqlQuery);
+        AdhocQueryType q = dqm.createSQLQuery(sqlQuery);
 		AdhocQueryResponse rr = (AdhocQueryResponse) dqm.executeQuery(q);
 
 		Collection<ServiceBindingType> sList = new ArrayList<ServiceBindingType>();
@@ -434,7 +434,7 @@ public class BusinessQueryManager extends QueryManager implements javax.xml.regi
 		OrganizationQueryType q = queryFac.createOrganizationQueryType();
 		JAXBElement<OrganizationQueryType> ebq = queryFac.createOrganizationQuery(q);
 
-		AdhocQueryType aqt = dqm.createQuery(CanonicalConstants.CANONICAL_QUERY_LANGUAGE_LID_ebRSFilterQuery, ebq);
+		AdhocQueryType aqt = dqm.createRSFilterQuery(ebq);
 		AdhocQueryResponse rr = (AdhocQueryResponse) dqm.executeQuery(aqt);
 
 		Collection<OrganizationType> sList = new ArrayList<OrganizationType>();
@@ -453,7 +453,7 @@ public class BusinessQueryManager extends QueryManager implements javax.xml.regi
 		ServiceQueryType q = queryFac.createServiceQueryType();
 		JAXBElement<ServiceQueryType> ebq = queryFac.createServiceQuery(q);
 
-		AdhocQueryType aqt = dqm.createQuery(CanonicalConstants.CANONICAL_QUERY_LANGUAGE_LID_ebRSFilterQuery, ebq);
+		AdhocQueryType aqt = dqm.createRSFilterQuery(ebq);
 		AdhocQueryResponse rr = (AdhocQueryResponse) dqm.executeQuery(aqt);
 
 		Collection<ServiceType> sList = new ArrayList<ServiceType>();
@@ -474,7 +474,7 @@ public class BusinessQueryManager extends QueryManager implements javax.xml.regi
                 CanonicalConstants.CANONICAL_ASSOCIATION_TYPE_ID_OffersService +
                 "' and a.sourceobject = '" + orgId + "'))";
         
-        AdhocQueryType q = dqm.createQuery(CanonicalConstants.CANONICAL_QUERY_LANGUAGE_LID_SQL_92, sqlQuery);
+        AdhocQueryType q = dqm.createSQLQuery(sqlQuery);
 		AdhocQueryResponse rr = (AdhocQueryResponse) dqm.executeQuery(q);
 
 		Collection<ServiceType> sList = new ArrayList<ServiceType>();
@@ -495,7 +495,7 @@ public class BusinessQueryManager extends QueryManager implements javax.xml.regi
                 CanonicalConstants.CANONICAL_ASSOCIATION_TYPE_ID_OffersService +
                 "' and a.sourceobject = '" + orgId + "')";
         
-        AdhocQueryType q = dqm.createQuery(CanonicalConstants.CANONICAL_QUERY_LANGUAGE_LID_SQL_92, sqlQuery);
+        AdhocQueryType q = dqm.createSQLQuery(sqlQuery);
 		AdhocQueryResponse rr = (AdhocQueryResponse) dqm.executeQuery(q);
 
 		Collection<ServiceType> sList = new ArrayList<ServiceType>();
@@ -513,7 +513,7 @@ public class BusinessQueryManager extends QueryManager implements javax.xml.regi
 	public Collection<ServiceType> findServicesByClassificationNode(String id) throws JAebXRException {
         String sqlQuery = "SELECT s.* FROM Service s WHERE id IN (SELECT service FROM ServiceBinding WHERE id IN (SELECT servicebinding FROM SpecificationLink WHERE specificationobject = '" + id + "'))";
         
-        AdhocQueryType q = dqm.createQuery(CanonicalConstants.CANONICAL_QUERY_LANGUAGE_LID_SQL_92, sqlQuery);
+        AdhocQueryType q = dqm.createSQLQuery(sqlQuery);
 		AdhocQueryResponse rr = (AdhocQueryResponse) dqm.executeQuery(q);
 
 		Collection<ServiceType> sList = new ArrayList<ServiceType>();
@@ -538,7 +538,7 @@ public class BusinessQueryManager extends QueryManager implements javax.xml.regi
 		q.setPrimaryFilter(rf);
 		JAXBElement<ServiceQueryType> ebq = queryFac.createServiceQuery(q);
 
-		AdhocQueryType aqt = dqm.createQuery(CanonicalConstants.CANONICAL_QUERY_LANGUAGE_LID_ebRSFilterQuery, ebq);
+		AdhocQueryType aqt = dqm.createRSFilterQuery(ebq);
 		AdhocQueryResponse rr = (AdhocQueryResponse) dqm.executeQuery(aqt);
 
 		Collection<ServiceType> res = new ArrayList<ServiceType>();
@@ -610,7 +610,7 @@ public class BusinessQueryManager extends QueryManager implements javax.xml.regi
 		String query = "SELECT eo.* FROM ExtrinsicObject eo, Association a WHERE a.sourceObject = '" + rp.getId() + 
 						"' AND a.associationType = '" + CanonicalConstants.CANONICAL_ASSOCIATION_TYPE_CODE_HasMember + "'";
 
-		AdhocQueryType aqt = dqm.createQuery(CanonicalConstants.CANONICAL_QUERY_LANGUAGE_LID_SQL_92, query);
+		AdhocQueryType aqt = dqm.createSQLQuery(query);
 		AdhocQueryResponse rr = (AdhocQueryResponse) dqm.executeQuery(aqt);
 
 		Collection<ExtrinsicObjectType> eoList = new ArrayList<ExtrinsicObjectType>();
@@ -697,7 +697,7 @@ public class BusinessQueryManager extends QueryManager implements javax.xml.regi
 		q.setPrimaryFilter(rf);
 		JAXBElement<ClassificationNodeQueryType> ebq = queryFac.createClassificationNodeQuery(q);
 
-		AdhocQueryType aqt = dqm.createQuery(CanonicalConstants.CANONICAL_QUERY_LANGUAGE_LID_ebRSFilterQuery, ebq);
+		AdhocQueryType aqt = dqm.createRSFilterQuery(ebq);
 		AdhocQueryResponse rr = (AdhocQueryResponse) dqm.executeQuery(aqt);
 
 		Collection<ClassificationNodeType> res = new ArrayList<ClassificationNodeType>();
@@ -754,7 +754,7 @@ public class BusinessQueryManager extends QueryManager implements javax.xml.regi
 		aq.setPrimaryFilter(f);
 		JAXBElement<AssociationQueryType> ebq = queryFac.createAssociationQuery(aq);
 		
-		AdhocQueryType aqt = dqm.createQuery(CanonicalConstants.CANONICAL_QUERY_LANGUAGE_LID_ebRSFilterQuery, ebq);
+		AdhocQueryType aqt = dqm.createRSFilterQuery(ebq);
 		AdhocQueryResponse rr = (AdhocQueryResponse) dqm.executeQuery(aqt);
 
 		Collection<AssociationType1> res = new ArrayList<AssociationType1>();
@@ -783,7 +783,7 @@ public class BusinessQueryManager extends QueryManager implements javax.xml.regi
 		roq.setPrimaryFilter(f);		
 		JAXBElement<RegistryObjectQueryType> ebq = queryFac.createRegistryObjectQuery(roq);
 		
-		AdhocQueryType aqt = dqm.createQuery(CanonicalConstants.CANONICAL_QUERY_LANGUAGE_LID_ebRSFilterQuery, ebq);
+		AdhocQueryType aqt = dqm.createRSFilterQuery(ebq);
 		AdhocQueryResponse rr = (AdhocQueryResponse) dqm.executeQuery(aqt);
 
 		
@@ -839,7 +839,7 @@ public class BusinessQueryManager extends QueryManager implements javax.xml.regi
 		String query = "SELECT ae.* FROM AuditableEvent ae, AffectedObject ao, RegistryObject ro WHERE ro.lid='" + ro.getLid() +
 				"' AND ro.id = ao.id AND ao.eventId = ae.id ORDER BY ae.timeStamp_ ASC";
 
-		AdhocQueryType aqt = dqm.createQuery(CanonicalConstants.CANONICAL_QUERY_LANGUAGE_LID_SQL_92, query);
+		AdhocQueryType aqt = dqm.createSQLQuery(query);
 		AdhocQueryResponse rr = (AdhocQueryResponse) dqm.executeQuery(aqt);
 
 		Collection<AuditableEventType> auditTrail = new ArrayList<AuditableEventType>();
@@ -859,7 +859,7 @@ public class BusinessQueryManager extends QueryManager implements javax.xml.regi
 				"' AND ass.associationType = '" + CanonicalConstants.CANONICAL_ASSOCIATION_TYPE_ID_ExternallyLinks +
 				"' AND ass.sourceObject = el.id ";
 
-		AdhocQueryType aqt = dqm.createQuery(CanonicalConstants.CANONICAL_QUERY_LANGUAGE_LID_SQL_92, query);
+		AdhocQueryType aqt = dqm.createSQLQuery(query);
 		AdhocQueryResponse rr = (AdhocQueryResponse) dqm.executeQuery(aqt);
 
 		Collection<ExternalLinkType> ell = new ArrayList<ExternalLinkType>();
@@ -883,7 +883,7 @@ public class BusinessQueryManager extends QueryManager implements javax.xml.regi
 	public Collection<RegistryObjectType> getRegistryObjectsByObjectType(String objectType) throws JAebXRException {
 		String query = "SELECT ro.* FROM RegistryObject ro WHERE objectType='" + objectType + "'";
 
-		AdhocQueryType aqt = dqm.createQuery(CanonicalConstants.CANONICAL_QUERY_LANGUAGE_LID_SQL_92, query);
+		AdhocQueryType aqt = dqm.createSQLQuery(query);
 		AdhocQueryResponse rr = (AdhocQueryResponse) dqm.executeQuery(aqt);
 
 		Collection<RegistryObjectType> ell = new ArrayList<RegistryObjectType>();
@@ -913,7 +913,7 @@ public class BusinessQueryManager extends QueryManager implements javax.xml.regi
                 CanonicalConstants.CANONICAL_ASSOCIATION_TYPE_ID_AffiliatedWith + 
                 "' AND a.targetObject = '" + o.getId() + "'";
 		
-		AdhocQueryType aqt = dqm.createQuery(CanonicalConstants.CANONICAL_QUERY_LANGUAGE_LID_SQL_92, query);
+		AdhocQueryType aqt = dqm.createSQLQuery(query);
 		AdhocQueryResponse rr = (AdhocQueryResponse) dqm.executeQuery(aqt);
 
 		Collection<UserType> res = new ArrayList<UserType>();

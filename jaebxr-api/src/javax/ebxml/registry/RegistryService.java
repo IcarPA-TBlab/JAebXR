@@ -17,13 +17,16 @@ public class RegistryService implements javax.xml.registry.RegistryService {
 	private BusinessQueryManager bqm = null;
 	private DeclarativeQueryManager dqm = null;
 
-	public RegistryService(Cache<String, RegistryObjectType> c) throws JAXRException {
+	public RegistryService(Cache<String, RegistryObjectType> c, boolean sqlQueriesEnabled) throws JAXRException {
 		blcm = new BusinessLifeCycleManager(this);
 		blcm.setCache(c);
 		
 		dqm = new DeclarativeQueryManager(this);
 		
-		bqm = new BusinessQueryManager(dqm);
+		if (sqlQueriesEnabled)
+			bqm = new SQLBusinessQueryManager(dqm);
+		else
+			bqm = new BusinessQueryManager(dqm);
 		bqm.setCache(c);
 	}
 

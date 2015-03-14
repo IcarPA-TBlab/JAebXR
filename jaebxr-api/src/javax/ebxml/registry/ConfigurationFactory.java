@@ -35,6 +35,7 @@ public class ConfigurationFactory {
     private static String registryUUID;
     private static String registryDriverName;
     private static String connectionFactoryClass;
+    private static boolean sqlQueries;
     private static int cacheExpirationTime;
     private static int cacheMaxSize;
     private static Properties properties = new Properties();
@@ -137,6 +138,10 @@ public class ConfigurationFactory {
     	return cacheMaxSize;
     }
     
+    public boolean areSqlQueriesEnabled() {
+    	return sqlQueries;
+    }
+    
     private void loadProperties() throws JAXRException {
         synchronized (properties) {
             properties = new Properties();
@@ -158,7 +163,6 @@ public class ConfigurationFactory {
         this.setClientKeystorePass(properties.getProperty("keystorePass"));
         this.setClientCertificateType(properties.getProperty("certificateType"));
 
-        //this.setRegistryDriverName(properties.getProperty("registry.driver"));
         this.setClientRegistryUrl(properties.getProperty("registryURL"));
         this.setRegistryName(properties.getProperty("registryName"));
         this.setRegistryUUID(properties.getProperty("registryUUID"));
@@ -167,6 +171,8 @@ public class ConfigurationFactory {
         
         this.setCacheExpirationTime(properties.getProperty("cacheExpirationTime"));
         this.setCacheMaxSize(properties.getProperty("cacheMaxSize"));
+        
+        this.setSqlQueries(properties.getProperty("sqlQueries"));
         
         try {
 			keyStore = KeyStore.getInstance("JKS");
@@ -253,5 +259,9 @@ public class ConfigurationFactory {
     	} catch (NumberFormatException e) {
     		ConfigurationFactory.cacheMaxSize = 512; //default 512 KB
     	}
+    }
+    
+    public synchronized void setSqlQueries(String flag) {
+    	ConfigurationFactory.sqlQueries = Boolean.parseBoolean(flag);
     }
 }

@@ -27,7 +27,7 @@ public class JAebXRClient {
     private JAebXRClient() throws JAebXRException {
     	try {
     		ConfigurationFactory conf = ConfigurationFactory.getInstance();
-    		service = new RegistryService(conf.getCache());
+    		service = new RegistryService(conf.getCache(), conf.areSqlQueriesEnabled());
 			lcm = service.getBusinessLifeCycleManager();
 			dqm = service.getDeclarativeQueryManager();
 			bqm = service.getBusinessQueryManager();
