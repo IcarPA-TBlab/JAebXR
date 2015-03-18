@@ -24,9 +24,9 @@ public class RegistryService implements javax.xml.registry.RegistryService {
 		dqm = new DeclarativeQueryManager(this);
 		
 		if (sqlQueriesEnabled)
-			bqm = new SQLBusinessQueryManager(dqm);
+			bqm = new SQLBusinessQueryManager(dqm, blcm);
 		else
-			bqm = new BusinessQueryManager(dqm);
+			bqm = new BusinessQueryManager(dqm, blcm);
 		bqm.setCache(c);
 	}
 
@@ -34,7 +34,7 @@ public class RegistryService implements javax.xml.registry.RegistryService {
 		this.rs = rs;
 		blcm = new BusinessLifeCycleManager(this);
 		this.dqm = new DeclarativeQueryManager(this);
-		this.bqm = new BusinessQueryManager(this.dqm);
+		this.bqm = new BusinessQueryManager(this);
 	}
 	
 	@Override
