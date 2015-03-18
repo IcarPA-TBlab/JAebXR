@@ -49,6 +49,13 @@ public class DeclarativeQueryManager extends QueryManager implements javax.xml.r
 		return dqm.createQuery(arg0, arg1);
 	}
 
+	private AdhocQueryType createAdhocQueryType(QueryExpressionType qet) {
+		AdhocQueryType aqt = rimFac.createAdhocQueryType();
+		aqt.setId(createUUID());		
+		aqt.setQueryExpression(qet);
+		return aqt;
+	}
+	
 	public AdhocQueryType createRSFilterQuery(JAXBElement<? extends RegistryObjectQueryType> query) throws JAebXRException {
 		QueryExpressionType qet = rimFac.createQueryExpressionType();
 		qet.setQueryLanguage(CanonicalConstants.CANONICAL_QUERY_LANGUAGE_LID_ebRSFilterQuery);
@@ -59,11 +66,7 @@ public class DeclarativeQueryManager extends QueryManager implements javax.xml.r
 			throw new JAebXRException(e1);
 		}
 
-		AdhocQueryType aqt = rimFac.createAdhocQueryType();
-		aqt.setId(createUUID());		
-		aqt.setQueryExpression(qet);
-
-		return aqt;
+		return createAdhocQueryType(qet);
 	}
 
 	public AdhocQueryType createSQLQuery(String query) throws JAebXRException {
@@ -71,11 +74,7 @@ public class DeclarativeQueryManager extends QueryManager implements javax.xml.r
 		qet.setQueryLanguage(CanonicalConstants.CANONICAL_QUERY_LANGUAGE_LID_SQL_92);
 		qet.getContent().add(query);
 		
-		AdhocQueryType aqt = rimFac.createAdhocQueryType();		
-		aqt.setId(createUUID());		
-		aqt.setQueryExpression(qet);
-
-		return aqt;
+		return createAdhocQueryType(qet);
 	}
 	
 	@Override
