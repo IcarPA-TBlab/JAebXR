@@ -3,6 +3,7 @@ package javax.ebxml.registry;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Iterator;
+import java.util.List;
 import java.util.StringTokenizer;
 
 import javax.xml.bind.JAXBElement;
@@ -46,12 +47,14 @@ import org.oasis.ebxml.registry.bindings.rs.RegistryResponseType;
 public class BusinessQueryManager extends QueryManager implements javax.xml.registry.BusinessQueryManager {
 
 	private javax.xml.registry.BusinessQueryManager bqm = null;
+	protected LifeCycleManager lcm = null;
 	protected DeclarativeQueryManager dqm = null;
 	protected Cache<String, RegistryObjectType> cache = null;
 
-	public BusinessQueryManager(DeclarativeQueryManager qm) throws JAXRException {
+	public BusinessQueryManager(DeclarativeQueryManager qm, LifeCycleManager lc) throws JAXRException {
 		super();
 		this.dqm = qm;
+		this.lcm = lc;
 		this.setSOAPMessenger(ConfigurationFactory.getInstance().getSOAPMessenger());
 	}
 	
@@ -187,7 +190,7 @@ public class BusinessQueryManager extends QueryManager implements javax.xml.regi
 			Iterator<JAXBElement<? extends IdentifiableType>> i = rr.getRegistryObjectList().getIdentifiable().iterator();
 			if (i.hasNext()) {
 				res = (ClassificationSchemeType) i.next().getValue();
-				res.getClassificationNode().addAll(getChildrens(res.getId()));
+				res.getClassificationNode().addAll(loadChildrens(res.getId()));
 				cache.put(res.getId(), res);
 			}
 			
@@ -218,7 +221,7 @@ public class BusinessQueryManager extends QueryManager implements javax.xml.regi
 			Iterator<JAXBElement<? extends IdentifiableType>> i = rr.getRegistryObjectList().getIdentifiable().iterator();
 			if (i.hasNext()) {
 				res = (ClassificationSchemeType) i.next().getValue();
-				res.getClassificationNode().addAll(getChildrens(res.getId()));
+				res.getClassificationNode().addAll(loadChildrens(res.getId()));
 				cache.put(res.getId(), res);
 			}
 			
@@ -249,7 +252,7 @@ public class BusinessQueryManager extends QueryManager implements javax.xml.regi
 			Iterator<JAXBElement<? extends IdentifiableType>> i = rr.getRegistryObjectList().getIdentifiable().iterator();
 			while (i.hasNext()) {
 				ClassificationNodeType node = (ClassificationNodeType) i.next().getValue();
-				node.getClassificationNode().addAll(getChildrens(node.getId()));
+				node.getClassificationNode().addAll(loadChildrens(node.getId()));
 				res.add(node);
 			}
 		}
@@ -292,7 +295,7 @@ public class BusinessQueryManager extends QueryManager implements javax.xml.regi
 			Iterator<JAXBElement<? extends IdentifiableType>> i = rr.getRegistryObjectList().getIdentifiable().iterator();
 			if (i.hasNext()) {
 				res = (ClassificationNodeType) i.next().getValue();
-				res.getClassificationNode().addAll(getChildrens(res.getId()));
+				res.getClassificationNode().addAll(loadChildrens(res.getId()));
 				cache.put(path, res);
 			}
 		}
@@ -686,34 +689,43 @@ public class BusinessQueryManager extends QueryManager implements javax.xml.regi
 		
 		return res;
 	}
-	
-	public Collection<ClassificationNodeType> getChildrens(String id) throws JAebXRException {
-		StringFilterType rf = queryFac.createStringFilterType();
-		rf.setComparator(SimpleFilterType.Comparator.EQ);
-		rf.setDomainAttribute("parent");
-		rf.setValue(id);
+
+	public Collection<ClassificationNodeType> getChildrens(ClassificationSchemeType cs) throws JAebXRException {
+		Collection<ClassificationNodeType> res = null;
+
+		List<ClassificationNodeType> concepts = cs.getClassificationNode();
 		
-		ClassificationNodeQueryType q = queryFac.createClassificationNodeQueryType();
-		q.setPrimaryFilter(rf);
-		JAXBElement<ClassificationNodeQueryType> ebq = queryFac.createClassificationNodeQuery(q);
+		if ((concepts != null) && (concepts.size()>0)) {
+			res = new ArrayList<ClassificationNodeType>();
+			Iterator<ClassificationNodeType> it = concepts.iterator();
+			while (it.hasNext()) {
+				ClassificationNodeType obj = it.next();
+				res.add(obj);
+				res.addAll(getChildrens(obj));
+			}
+		}
 
-		AdhocQueryType aqt = dqm.createRSFilterQuery(ebq);
-		AdhocQueryResponse rr = (AdhocQueryResponse) dqm.executeQuery(aqt);
-
+		return res;		
+	}
+	
+	public Collection<ClassificationNodeType> getChildrens(ClassificationNodeType cn) throws JAebXRException {
 		Collection<ClassificationNodeType> res = new ArrayList<ClassificationNodeType>();
 
-		if (isStatusSuccess(rr)) {
-			Iterator<JAXBElement<? extends IdentifiableType>> i = rr.getRegistryObjectList().getIdentifiable().iterator();
-			while (i.hasNext()) {
-				ClassificationNodeType node = (ClassificationNodeType) i.next().getValue();
-				res.add(node);
-				res.addAll(getChildrens(node.getId()));
+		List<ClassificationNodeType> concepts = cn.getClassificationNode();
+		
+		if ((concepts != null) && (concepts.size()>0)) {
+			Iterator<ClassificationNodeType> it = concepts.iterator();
+			while (it.hasNext()) {
+				ClassificationNodeType obj = it.next();
+				res.add(obj);
+				res.addAll(getChildrens(obj));
 			}
 		}
 
 		return res;
 	}
-	
+
+
 	public Collection<ClassificationNodeType> getDescendantClassificationNodes(ClassificationSchemeType cs) {
 		Collection<ClassificationNodeType> res = new ArrayList<ClassificationNodeType>();
 		
@@ -793,12 +805,12 @@ public class BusinessQueryManager extends QueryManager implements javax.xml.regi
 				res = (RegistryObjectType) i.next().getValue();
 				if (res instanceof ClassificationSchemeType) {
 					ClassificationSchemeType cs = (ClassificationSchemeType)res;
-					cs.getClassificationNode().addAll(getChildrens(res.getId()));
+					cs.getClassificationNode().addAll(loadChildrens(res.getId()));
 					cache.put(id, cs);
 					return cs;
 				} else if (res instanceof ClassificationNodeType) {
 					ClassificationNodeType cn = (ClassificationNodeType)res;
-					cn.getClassificationNode().addAll(getChildrens(res.getId()));
+					cn.getClassificationNode().addAll(loadChildrens(res.getId()));
 					cache.put(id, cn);
 					return cn;					
 				} else if (res instanceof RegistryPackageType) {
@@ -922,6 +934,34 @@ public class BusinessQueryManager extends QueryManager implements javax.xml.regi
 			Iterator<JAXBElement<? extends IdentifiableType>> i = rr.getRegistryObjectList().getIdentifiable().iterator();
 			while (i.hasNext()) {				
 				res.add((UserType) i.next().getValue());
+			}
+		}
+
+		return res;
+	}
+		
+	private Collection<ClassificationNodeType> loadChildrens(String id) throws JAebXRException {
+		StringFilterType rf = queryFac.createStringFilterType();
+		rf.setComparator(SimpleFilterType.Comparator.EQ);
+		rf.setDomainAttribute("parent");
+		rf.setValue(id);
+		
+		ClassificationNodeQueryType q = queryFac.createClassificationNodeQueryType();
+		q.setPrimaryFilter(rf);
+		JAXBElement<ClassificationNodeQueryType> ebq = queryFac.createClassificationNodeQuery(q);
+
+		AdhocQueryType aqt = dqm.createRSFilterQuery(ebq);
+		AdhocQueryResponse rr = (AdhocQueryResponse) dqm.executeQuery(aqt);
+
+		Collection<ClassificationNodeType> res = new ArrayList<ClassificationNodeType>();
+
+		if (isStatusSuccess(rr)) {
+			Iterator<JAXBElement<? extends IdentifiableType>> i = rr.getRegistryObjectList().getIdentifiable().iterator();
+			while (i.hasNext()) {
+				ClassificationNodeType node = (ClassificationNodeType) i.next().getValue();
+				node.getClassificationNode().addAll(loadChildrens(node.getId()));
+				res.add(node);
+				cache.put(node.getId(), node);
 			}
 		}
 
