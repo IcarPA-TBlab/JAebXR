@@ -144,7 +144,7 @@ public class SQLBusinessQueryManager extends BusinessQueryManager {
 	}
 
 	public Collection<OrganizationType> findOrganizations() throws JAebXRException {
-		String sqlQuery = "SELECT o.* FROM Organization";
+		String sqlQuery = "SELECT o.* FROM Organization o";
 
 		AdhocQueryType aqt = dqm.createSQLQuery(sqlQuery);
 		AdhocQueryResponse rr = (AdhocQueryResponse) dqm.executeQuery(aqt);
@@ -159,6 +159,24 @@ public class SQLBusinessQueryManager extends BusinessQueryManager {
 		}
 
 		return sList;		
+	}
+
+	public Collection<ServiceType> findServices() throws JAebXRException {
+		String sqlQuery = "SELECT s.* FROM Service s";
+
+		AdhocQueryType aqt = dqm.createSQLQuery(sqlQuery);
+		AdhocQueryResponse rr = (AdhocQueryResponse) dqm.executeQuery(aqt);
+
+		Collection<ServiceType> res = new ArrayList<ServiceType>();
+		
+		if (isStatusSuccess(rr)) {
+			Iterator<JAXBElement<? extends IdentifiableType>> i = rr.getRegistryObjectList().getIdentifiable().iterator();
+			while (i.hasNext()) {
+				res.add((ServiceType) i.next().getValue());
+			}
+		}
+
+		return res;
 	}
 	
 	public Collection<ServiceType> findServicesByNamePattern(String namePattern) throws JAebXRException {
